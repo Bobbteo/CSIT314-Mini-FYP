@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="card login-card">
+    <h1>Login</h1>
+    <p class="subtitle">Sign in to access your dashboard</p>
+
+    <form method="POST" action="{{ url_for('login') }}">
+        <div class="form-group">
+            <label for="username_or_email">Username or Email</label>
+            <input
+                type="text"
+                id="username_or_email"
+                name="username_or_email"
+                placeholder="Enter your username or email"
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Enter your password"
+                required
+            >
+        </div>
+
+        <button type="submit" class="btn-primary">Login</button>
+    </form>
+
+    <div class="demo-box">
+        <h3>Demo Accounts</h3>
+        <ul>
+            <li><strong>Admin:</strong> admin1 / password123</li>
+            <li><strong>Fundraiser:</strong> fundraiser1 / password123</li>
+            <li><strong>Donee:</strong> donee1 / password123</li>
+            <li><strong>Manager:</strong> manager1 / password123</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
