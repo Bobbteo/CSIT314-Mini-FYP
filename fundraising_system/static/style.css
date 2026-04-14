@@ -141,11 +141,19 @@ input[type="password"] {
     background: #16324f;
 }
 
+.flash-stack {
+    margin-bottom: 20px;
+}
+
 .flash {
     padding: 14px 18px;
     border-radius: 8px;
     margin-bottom: 20px;
     font-weight: bold;
+}
+
+.flash-stack .flash:last-child {
+    margin-bottom: 0;
 }
 
 .flash-success {
