@@ -195,3 +195,144 @@ input[type="password"] {
 .demo-box li {
     margin-bottom: 8px;
 }
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.action-btn,
+.search-btn,
+.clear-btn,
+.table-btn {
+    display: inline-block;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.action-btn {
+    background: #1d3557;
+    color: white;
+}
+
+.search-btn {
+    background: #457b9d;
+    color: white;
+}
+
+.clear-btn {
+    background: #adb5bd;
+    color: white;
+}
+
+.edit-btn {
+    background: #2a9d8f;
+    color: white;
+}
+
+.suspend-btn {
+    background: #e63946;
+    color: white;
+}
+
+.search-form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.search-input {
+    flex: 1;
+    min-width: 260px;
+    padding: 11px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+.account-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.account-table th,
+.account-table td {
+    padding: 12px;
+    border-bottom: 1px solid #e6e6e6;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.account-table th {
+    background: #f1f5f9;
+    color: #1d3557;
+}
+
+.action-cell {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.status-badge {
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: capitalize;
+}
+
+.status-active {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-inactive {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-suspended {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.form-card {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+select,
+input[type="email"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cfcfcf;
+    border-radius: 8px;
+    font-size: 15px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.empty-row {
+    text-align: center;
+    color: #666;
+    padding: 20px;
+}

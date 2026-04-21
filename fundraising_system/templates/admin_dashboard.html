@@ -4,8 +4,80 @@
 
 {% block content %}
 <div class="card">
-    <h1>Admin Dashboard</h1>
-    <p>Welcome, {{ user_name }}.</p>
-    <p>This page is for system administrators.</p>
+    <div class="page-header">
+        <div>
+            <h1>Admin Dashboard</h1>
+            <p>Welcome, {{ user_name }}.</p>
+            <p>Manage all user accounts here.</p>
+        </div>
+        <div>
+            <a href="{{ url_for('create_account') }}" class="action-btn">+ Create Account</a>
+        </div>
+    </div>
+
+    <form method="GET" action="{{ url_for('admin_dashboard') }}" class="search-form">
+        <input
+            type="text"
+            name="keyword"
+            value="{{ keyword }}"
+            placeholder="Search by name, username, email, or role"
+            class="search-input"
+        >
+        <button type="submit" class="search-btn">Search</button>
+        <a href="{{ url_for('admin_dashboard') }}" class="clear-btn">Clear</a>
+    </form>
+
+    <div class="table-wrap">
+        <table class="account-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Full Name</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Created At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if accounts %}
+                    {% for account in accounts %}
+                    <tr>
+                        <td>{{ account.account_id }}</td>
+                        <td>{{ account.full_name }}</td>
+                        <td>{{ account.username }}</td>
+                        <td>{{ account.email }}</td>
+                        <td>{{ account.role }}</td>
+                        <td>
+                            <span class="status-badge status-{{ account.status }}">
+                                {{ account.status }}
+                            </span>
+                        </td>
+                        <td>{{ account.created_at }}</td>
+                        <td class="action-cell">
+                            <a href="{{ url_for('edit_account', account_id=account.account_id) }}" class="table-btn edit-btn">
+                                Edit
+                            </a>
+
+                            {% if account.status != 'suspended' %}
+                            <form action="{{ url_for('suspend_account', account_id=account.account_id) }}" method="POST" style="display:inline;">
+                                <button type="submit" class="table-btn suspend-btn">
+                                    Suspend
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" class="empty-row">No accounts found.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock %}

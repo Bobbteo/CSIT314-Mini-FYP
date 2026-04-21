@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if form_mode == 'create' %}Create Account{% else %}Edit Account{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="card form-card">
+    <h1>
+        {% if form_mode == 'create' %}
+            Create Account
+        {% else %}
+            Edit Account
+        {% endif %}
+    </h1>
+
+    <form method="POST">
+        <div class="form-group">
+            <label for="full_name">Full Name</label>
+            <input type="text" id="full_name" name="full_name"
+                   value="{{ account.full_name if account else '' }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username"
+                   value="{{ account.username if account else '' }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email"
+                   value="{{ account.email if account else '' }}" required>
+        </div>
+
+        {% if form_mode == 'create' %}
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        {% else %}
+        <div class="form-group">
+            <label for="new_password">New Password (leave blank to keep current password)</label>
+            <input type="password" id="new_password" name="new_password">
+        </div>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="role">Role</label>
+            <select id="role" name="role" required>
+                {% set selected_role = account.role if account else '' %}
+                <option value="">Select Role</option>
+                <option value="admin" {% if selected_role == 'admin' %}selected{% endif %}>Admin</option>
+                <option value="fundraiser" {% if selected_role == 'fundraiser' %}selected{% endif %}>Fundraiser</option>
+                <option value="doner" {% if selected_role == 'doner' %}selected{% endif %}>Doner</option>
+                <option value="manager" {% if selected_role == 'manager' %}selected{% endif %}>Manager</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="status">Status</label>
+            {% set selected_status = account.status if account else 'active' %}
+            <select id="status" name="status" required>
+                <option value="active" {% if selected_status == 'active' %}selected{% endif %}>Active</option>
+                <option value="inactive" {% if selected_status == 'inactive' %}selected{% endif %}>Inactive</option>
+                <option value="suspended" {% if selected_status == 'suspended' %}selected{% endif %}>Suspended</option>
+            </select>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('admin_dashboard') }}" class="clear-btn">Back</a>
+            <button type="submit" class="action-btn">
+                {% if form_mode == 'create' %}Create{% else %}Update{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

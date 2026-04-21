@@ -2,12 +2,13 @@ from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from config import SECRET_KEY
 from control.loginC import LoginController
+from control.adminAccountC import AdminAccountController
 
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
 
 login_controller = LoginController()
-
+admin_account_controller = AdminAccountController()
 
 def login_required(f):
     @wraps(f)
@@ -80,12 +81,98 @@ def dashboard_redirect():
     flash(f"Unknown user role: {role}", "danger")
     return redirect(url_for("login"))
 
+#admin page 
 
 @app.route("/admin")
 @login_required
 @role_required("admin")
 def admin_dashboard():
-    return render_template("admin_dashboard.html", user_name=session.get("full_name"))
+    keyword = request.args.get("keyword", "").strip()
+
+    if keyword:
+        accounts = admin_account_controller.search_accounts(keyword)
+    else:
+        accounts = admin_account_controller.get_all_accounts()
+
+    return render_template(
+        "admin_dashboard.html",
+        user_name=session.get("full_name"),
+        accounts=accounts,
+        keyword=keyword
+    )
+
+
+@app.route("/admin/accounts/create", methods=["GET", "POST"])
+@login_required
+@role_required("admin")
+def create_account():
+    if request.method == "POST":
+        full_name = request.form.get("full_name", "")
+        username = request.form.get("username", "")
+        email = request.form.get("email", "")
+        password = request.form.get("password", "")
+        role = request.form.get("role", "")
+        status = request.form.get("status", "")
+
+        result = admin_account_controller.create_account(
+            full_name, username, email, password, role, status
+        )
+
+        if result["success"]:
+            flash(result["message"], "success")
+            return redirect(url_for("admin_dashboard"))
+
+        flash(result["message"], "danger")
+
+    return render_template(
+        "admin_account_form.html",
+        form_mode="create",
+        account=None
+    )
+
+
+@app.route("/admin/accounts/<int:account_id>/edit", methods=["GET", "POST"])
+@login_required
+@role_required("admin")
+def edit_account(account_id):
+    account = admin_account_controller.get_account_by_id(account_id)
+
+    if not account:
+        flash("Account not found.", "danger")
+        return redirect(url_for("admin_dashboard"))
+
+    if request.method == "POST":
+        full_name = request.form.get("full_name", "")
+        username = request.form.get("username", "")
+        email = request.form.get("email", "")
+        role = request.form.get("role", "")
+        status = request.form.get("status", "")
+        new_password = request.form.get("new_password", "")
+
+        result = admin_account_controller.update_account(
+            account_id, full_name, username, email, role, status, new_password
+        )
+
+        if result["success"]:
+            flash(result["message"], "success")
+            return redirect(url_for("admin_dashboard"))
+
+        flash(result["message"], "danger")
+
+    return render_template(
+        "admin_account_form.html",
+        form_mode="edit",
+        account=account
+    )
+
+
+@app.route("/admin/accounts/<int:account_id>/suspend", methods=["POST"])
+@login_required
+@role_required("admin")
+def suspend_account(account_id):
+    result = admin_account_controller.suspend_account(account_id)
+    flash(result["message"], "success" if result["success"] else "danger")
+    return redirect(url_for("admin_dashboard"))
 
 
 @app.route("/fundraiser")

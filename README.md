@@ -11,7 +11,7 @@
 ### 2) Start the app
 
 ```powershell
-.\.venv\Scripts\python fundraising_system\app.py
+.\.venv\Scripts\python fundraising_system\run.py
 ```
 
 ### 3) Open in browser
