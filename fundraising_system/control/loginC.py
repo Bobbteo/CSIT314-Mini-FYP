@@ -23,11 +23,11 @@ class LoginController:
                 "message": "Invalid username/email or password."
             }
 
-        if not account.is_active():
+        if account.is_suspended():
             return {
                 "success": False,
-                "message": "Your account is not active. Please contact support."
-            }
+                "message": "Your account has been suspended. Please contact support."
+    }
 
         if not check_password_hash(account.password_hash, password):
             return {

@@ -1,5 +1,5 @@
 import sqlite3
-from fundraising_system.config import DB_NAME
+from config import DB_NAME
 
 class DBHelper:
     @staticmethod

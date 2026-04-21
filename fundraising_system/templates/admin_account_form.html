@@ -16,15 +16,15 @@
 
     <form method="POST">
         <div class="form-group">
-            <label for="full_name">Full Name</label>
-            <input type="text" id="full_name" name="full_name"
-                   value="{{ account.full_name if account else '' }}" required>
-        </div>
-
-        <div class="form-group">
             <label for="username">Username</label>
             <input type="text" id="username" name="username"
                    value="{{ account.username if account else '' }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="full_name">Full Name</label>
+            <input type="text" id="full_name" name="full_name"
+                   value="{{ account.full_name if account else '' }}" required>
         </div>
 
         <div class="form-group">
@@ -46,26 +46,26 @@
         {% endif %}
 
         <div class="form-group">
-            <label for="role">Role</label>
+            <label for="role">Role Assignment</label>
             <select id="role" name="role" required>
-                {% set selected_role = account.role if account else '' %}
                 <option value="">Select Role</option>
-                <option value="admin" {% if selected_role == 'admin' %}selected{% endif %}>Admin</option>
                 <option value="fundraiser" {% if selected_role == 'fundraiser' %}selected{% endif %}>Fundraiser</option>
                 <option value="doner" {% if selected_role == 'doner' %}selected{% endif %}>Doner</option>
                 <option value="manager" {% if selected_role == 'manager' %}selected{% endif %}>Manager</option>
             </select>
         </div>
 
+        {% if form_mode == 'edit' %}
         <div class="form-group">
-            <label for="status">Status</label>
+            <label for="status">Account Status</label>
             {% set selected_status = account.status if account else 'active' %}
             <select id="status" name="status" required>
                 <option value="active" {% if selected_status == 'active' %}selected{% endif %}>Active</option>
-                <option value="inactive" {% if selected_status == 'inactive' %}selected{% endif %}>Inactive</option>
+                <option value="restricted" {% if selected_status == 'restricted' %}selected{% endif %}>Restricted</option>
                 <option value="suspended" {% if selected_status == 'suspended' %}selected{% endif %}>Suspended</option>
             </select>
         </div>
+        {% endif %}
 
         <div class="form-actions">
             <a href="{{ url_for('admin_dashboard') }}" class="clear-btn">Back</a>

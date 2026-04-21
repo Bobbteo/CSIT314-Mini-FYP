@@ -9,18 +9,20 @@ def init_database():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
+    # Account table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS Account (
         account_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        full_name TEXT NOT NULL,
         username TEXT NOT NULL UNIQUE,
+        full_name TEXT NOT NULL,
         email TEXT NOT NULL UNIQUE,
         password_hash TEXT NOT NULL,
-        status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active', 'inactive', 'suspended')),
+        status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active', 'restricted', 'suspended')),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
 
+    # UserProfile table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS UserProfile (
         profile_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,16 +32,23 @@ def init_database():
     )
     """)
 
-    cursor.execute("SELECT account_id FROM Account WHERE username = ?", ("admin1",))
+    # Check if admin account already exists
+    cursor.execute("SELECT account_id FROM Account WHERE username = ?", ("admin",))
     existing_admin = cursor.fetchone()
 
-    if not existing_admin:
-        password_hash = generate_password_hash("password123")
+    if existing_admin is None:
+        password_hash = generate_password_hash("admin")
 
         cursor.execute("""
-            INSERT INTO Account (full_name, username, email, password_hash, status)
+            INSERT INTO Account (username, full_name, email, password_hash, status)
             VALUES (?, ?, ?, ?, ?)
-        """, ("System Admin", "admin1", "admin1@example.com", password_hash, "active"))
+        """, (
+            "admin",
+            "admin",
+            "-",
+            password_hash,
+            "active"
+        ))
 
         admin_account_id = cursor.lastrowid
 
@@ -47,6 +56,20 @@ def init_database():
             INSERT INTO UserProfile (account_id, role)
             VALUES (?, ?)
         """, (admin_account_id, "admin"))
+
+        print("Admin account created.")
+    else:
+        # Make sure admin profile exists too
+        admin_account_id = existing_admin[0]
+        cursor.execute("SELECT profile_id FROM UserProfile WHERE account_id = ?", (admin_account_id,))
+        existing_profile = cursor.fetchone()
+
+        if existing_profile is None:
+            cursor.execute("""
+                INSERT INTO UserProfile (account_id, role)
+                VALUES (?, ?)
+            """, (admin_account_id, "admin"))
+            print("Admin profile created.")
 
     conn.commit()
     conn.close()

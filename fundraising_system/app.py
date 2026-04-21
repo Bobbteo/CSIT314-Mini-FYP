@@ -3,14 +3,14 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from config import SECRET_KEY
 from control.loginC import LoginController
 from control.adminAccountC import AdminAccountController
-from control.adminProfileC import AdminProfileController
+
 
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
 
 login_controller = LoginController()
 admin_account_controller = AdminAccountController()
-admin_profile_controller = AdminProfileController()
+
 
 def login_required(f):
     @wraps(f)
@@ -37,6 +37,15 @@ def role_required(required_role):
         return decorated_function
     return decorator
 
+def restricted_block_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Allow admin to bypass restriction
+        if session.get("role") != "admin" and session.get("status") == "restricted":
+            flash("Your account is restricted. You cannot perform this action.", "danger")
+            return redirect(url_for("dashboard_redirect"))
+        return f(*args, **kwargs)
+    return decorated_function
 
 @app.route("/")
 def home():
@@ -59,6 +68,7 @@ def login():
             session["full_name"] = account.full_name
             session["username"] = account.username
             session["role"] = result["role"]
+            session["status"] = account.status
 
             flash(result["message"], "success")
             return redirect(url_for("dashboard_redirect"))
@@ -84,7 +94,7 @@ def dashboard_redirect():
     return redirect(url_for("login"))
 
 '''
----------- Admin Page ----------
+---------- Admin Functions ----------
 '''
 
 @app.route("/admin")
@@ -109,6 +119,7 @@ def admin_dashboard():
 @app.route("/admin/accounts/create", methods=["GET", "POST"])
 @login_required
 @role_required("admin")
+@restricted_block_required
 def create_account():
     if request.method == "POST":
         full_name = request.form.get("full_name", "")
@@ -116,7 +127,7 @@ def create_account():
         email = request.form.get("email", "")
         password = request.form.get("password", "")
         role = request.form.get("role", "")
-        status = request.form.get("status", "")
+        status = "active"
 
         result = admin_account_controller.create_account(
             full_name, username, email, password, role, status
@@ -138,11 +149,18 @@ def create_account():
 @app.route("/admin/accounts/<int:account_id>/edit", methods=["GET", "POST"])
 @login_required
 @role_required("admin")
+@restricted_block_required
 def edit_account(account_id):
     account = admin_account_controller.get_account_by_id(account_id)
 
     if not account:
         flash("Account not found.", "danger")
+        return redirect(url_for("admin_dashboard"))
+
+    selected_role = admin_account_controller.get_role_by_account_id(account_id)
+
+    if selected_role == "admin":
+        flash("The admin account cannot be edited.", "danger")
         return redirect(url_for("admin_dashboard"))
 
     if request.method == "POST":
@@ -162,187 +180,27 @@ def edit_account(account_id):
             return redirect(url_for("admin_dashboard"))
 
         flash(result["message"], "danger")
+        selected_role = role
 
     return render_template(
         "admin_account_form.html",
         form_mode="edit",
-        account=account
+        account=account,
+        selected_role=selected_role
     )
 
 
 @app.route("/admin/accounts/<int:account_id>/suspend", methods=["POST"])
 @login_required
 @role_required("admin")
+@restricted_block_required
 def suspend_account(account_id):
     result = admin_account_controller.suspend_account(account_id)
     flash(result["message"], "success" if result["success"] else "danger")
     return redirect(url_for("admin_dashboard"))
 
-@app.route("/admin/profiles")
-@login_required
-@role_required("admin")
-def admin_profiles():
-    keyword = request.args.get("keyword", "").strip()
-
-    if keyword:
-        profiles = admin_profile_controller.search_profiles(keyword)
-    else:
-        profiles = admin_profile_controller.get_all_profiles()
-
-    return render_template(
-        "admin_profiles.html",
-        profiles=profiles,
-        keyword=keyword
-    )
-
-
-@app.route("/admin/profiles/create", methods=["GET", "POST"])
-@login_required
-@role_required("admin")
-def create_profile():
-    available_accounts = admin_profile_controller.get_accounts_without_profiles()
-
-    if request.method == "POST":
-        account_id = request.form.get("account_id", "").strip()
-        role = request.form.get("role", "").strip()
-
-        result = admin_profile_controller.create_profile(account_id, role)
-
-        if result["success"]:
-            flash(result["message"], "success")
-            return redirect(url_for("admin_profiles"))
-
-        flash(result["message"], "danger")
-
-    return render_template(
-        "admin_profile_form.html",
-        form_mode="create",
-        profile=None,
-        available_accounts=available_accounts
-    )
-
-
-@app.route("/admin/profiles/<int:profile_id>/edit", methods=["GET", "POST"])
-@login_required
-@role_required("admin")
-def edit_profile(profile_id):
-    profile = admin_profile_controller.get_profile_by_id(profile_id)
-
-    if not profile:
-        flash("Profile not found.", "danger")
-        return redirect(url_for("admin_profiles"))
-
-    if request.method == "POST":
-        role = request.form.get("role", "").strip()
-
-        result = admin_profile_controller.update_profile(profile_id, role)
-
-        if result["success"]:
-            flash(result["message"], "success")
-            return redirect(url_for("admin_profiles"))
-
-        flash(result["message"], "danger")
-
-    return render_template(
-        "admin_profile_form.html",
-        form_mode="edit",
-        profile=profile,
-        available_accounts=[]
-    )
-
-
-@app.route("/admin/profiles/<int:profile_id>/delete", methods=["POST"])
-@login_required
-@role_required("admin")
-def delete_profile(profile_id):
-    result = admin_profile_controller.delete_profile(profile_id)
-    flash(result["message"], "success" if result["success"] else "danger")
-    return redirect(url_for("admin_profiles"))
-
-
-@app.route("/admin/profiles")
-@login_required
-@role_required("admin")
-def admin_profiles():
-    keyword = request.args.get("keyword", "").strip()
-
-    if keyword:
-        profiles = admin_profile_controller.search_profiles(keyword)
-    else:
-        profiles = admin_profile_controller.get_all_profiles()
-
-    return render_template(
-        "admin_profiles.html",
-        profiles=profiles,
-        keyword=keyword
-    )
-
-
-@app.route("/admin/profiles/create", methods=["GET", "POST"])
-@login_required
-@role_required("admin")
-def create_profile():
-    available_accounts = admin_profile_controller.get_accounts_without_profiles()
-
-    if request.method == "POST":
-        account_id = request.form.get("account_id", "").strip()
-        role = request.form.get("role", "").strip()
-
-        result = admin_profile_controller.create_profile(account_id, role)
-
-        if result["success"]:
-            flash(result["message"], "success")
-            return redirect(url_for("admin_profiles"))
-
-        flash(result["message"], "danger")
-
-    return render_template(
-        "admin_profile_form.html",
-        form_mode="create",
-        profile=None,
-        available_accounts=available_accounts
-    )
-
-
-@app.route("/admin/profiles/<int:profile_id>/edit", methods=["GET", "POST"])
-@login_required
-@role_required("admin")
-def edit_profile(profile_id):
-    profile = admin_profile_controller.get_profile_by_id(profile_id)
-
-    if not profile:
-        flash("Profile not found.", "danger")
-        return redirect(url_for("admin_profiles"))
-
-    if request.method == "POST":
-        role = request.form.get("role", "").strip()
-
-        result = admin_profile_controller.update_profile(profile_id, role)
-
-        if result["success"]:
-            flash(result["message"], "success")
-            return redirect(url_for("admin_profiles"))
-
-        flash(result["message"], "danger")
-
-    return render_template(
-        "admin_profile_form.html",
-        form_mode="edit",
-        profile=profile,
-        available_accounts=[]
-    )
-
-
-@app.route("/admin/profiles/<int:profile_id>/delete", methods=["POST"])
-@login_required
-@role_required("admin")
-def delete_profile(profile_id):
-    result = admin_profile_controller.delete_profile(profile_id)
-    flash(result["message"], "success" if result["success"] else "danger")
-    return redirect(url_for("admin_profiles"))
-
 '''
----------- Fundraiser Page ----------
+---------- Fundraiser Functions ----------
 '''
 
 @app.route("/fundraiser")
@@ -351,6 +209,9 @@ def delete_profile(profile_id):
 def fundraiser_dashboard():
     return render_template("fundraiser_dashboard.html", user_name=session.get("full_name"))
 
+'''
+---------- Doner Functions ----------
+'''
 
 @app.route("/doner")
 @login_required
@@ -358,6 +219,9 @@ def fundraiser_dashboard():
 def doner_dashboard():
     return render_template("doner_dashboard.html", user_name=session.get("full_name"))
 
+'''
+---------- Manager Functions ----------
+'''
 
 @app.route("/manager")
 @login_required

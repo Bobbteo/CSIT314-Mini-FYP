@@ -336,3 +336,13 @@ input[type="email"] {
     color: #666;
     padding: 20px;
 }
+
+.protected-label {
+    display: inline-block;
+    background: #e5e7eb;
+    color: #374151;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+}
