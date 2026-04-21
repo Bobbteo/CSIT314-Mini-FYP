@@ -16,29 +16,37 @@ def init_database():
         username TEXT NOT NULL UNIQUE,
         email TEXT NOT NULL UNIQUE,
         password_hash TEXT NOT NULL,
-        role TEXT NOT NULL CHECK(role IN ('admin', 'fundraiser', 'doner', 'manager')),
         status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active', 'inactive', 'suspended')),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
 
-    demo_accounts = [
-        ("System Admin", "admin1", "admin1@example.com", "password123", "admin", "active"),
-        ("Fund Raiser One", "fundraiser1", "fundraiser1@example.com", "password123", "fundraiser", "active"),
-        ("Doner One", "doner1", "doner1@example.com", "password123", "doner", "active"),
-        ("Platform Manager", "manager1", "manager1@example.com", "password123", "manager", "active"),
-    ]
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS UserProfile (
+        profile_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        account_id INTEGER NOT NULL UNIQUE,
+        role TEXT NOT NULL CHECK(role IN ('admin', 'fundraiser', 'doner', 'manager')),
+        FOREIGN KEY (account_id) REFERENCES Account(account_id)
+    )
+    """)
 
-    for full_name, username, email, password, role, status in demo_accounts:
-        cursor.execute("SELECT account_id FROM Account WHERE username = ?", (username,))
-        existing_account = cursor.fetchone()
+    cursor.execute("SELECT account_id FROM Account WHERE username = ?", ("admin1",))
+    existing_admin = cursor.fetchone()
 
-        if not existing_account:
-            password_hash = generate_password_hash(password)
-            cursor.execute("""
-                INSERT INTO Account (full_name, username, email, password_hash, role, status)
-                VALUES (?, ?, ?, ?, ?, ?)
-            """, (full_name, username, email, password_hash, role, status))
+    if not existing_admin:
+        password_hash = generate_password_hash("password123")
+
+        cursor.execute("""
+            INSERT INTO Account (full_name, username, email, password_hash, status)
+            VALUES (?, ?, ?, ?, ?)
+        """, ("System Admin", "admin1", "admin1@example.com", password_hash, "active"))
+
+        admin_account_id = cursor.lastrowid
+
+        cursor.execute("""
+            INSERT INTO UserProfile (account_id, role)
+            VALUES (?, ?)
+        """, (admin_account_id, "admin"))
 
     conn.commit()
     conn.close()

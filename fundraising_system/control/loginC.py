@@ -1,9 +1,12 @@
 from werkzeug.security import check_password_hash
 from repository.account_repository import AccountRepository
+from repository.user_profile_repository import UserProfileRepository
+
 
 class LoginController:
     def __init__(self):
         self.account_repository = AccountRepository()
+        self.user_profile_repository = UserProfileRepository()
 
     def authenticate(self, username_or_email, password):
         if not username_or_email or not password:
@@ -32,10 +35,19 @@ class LoginController:
                 "message": "Invalid username/email or password."
             }
 
+        profile = self.user_profile_repository.find_by_account_id(account.account_id)
+
+        if not profile:
+            return {
+                "success": False,
+                "message": "No user profile assigned to this account."
+            }
+
         return {
             "success": True,
             "message": f"Welcome, {account.full_name}!",
-            "account": account
+            "account": account,
+            "role": profile.role
         }
 
     def get_dashboard_route(self, role):

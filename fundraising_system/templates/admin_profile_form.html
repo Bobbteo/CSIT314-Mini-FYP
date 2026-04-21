@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if form_mode == 'create' %}Create User Profile{% else %}Edit User Profile{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="card form-card">
+    <h1>
+        {% if form_mode == 'create' %}
+            Create User Profile
+        {% else %}
+            Edit User Profile
+        {% endif %}
+    </h1>
+
+    <form method="POST">
+        {% if form_mode == 'create' %}
+        <div class="form-group">
+            <label for="account_id">Select Account</label>
+            <select id="account_id" name="account_id" required>
+                <option value="">Select Account</option>
+                {% for account in available_accounts %}
+                    <option value="{{ account.account_id }}">
+                        {{ account.account_id }} - {{ account.full_name }} ({{ account.username }})
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        {% else %}
+        <div class="form-group">
+            <label>Profile ID</label>
+            <input type="text" value="{{ profile.profile_id }}" readonly>
+        </div>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="role">Role</label>
+            {% set selected_role = profile.role if profile else '' %}
+            <select id="role" name="role" required>
+                <option value="">Select Role</option>
+                <option value="fundraiser" {% if selected_role == 'fundraiser' %}selected{% endif %}>Fundraiser</option>
+                <option value="doner" {% if selected_role == 'doner' %}selected{% endif %}>Doner</option>
+                <option value="manager" {% if selected_role == 'manager' %}selected{% endif %}>Manager</option>
+            </select>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('admin_profiles') }}" class="clear-btn">Back</a>
+            <button type="submit" class="action-btn">
+                {% if form_mode == 'create' %}Create{% else %}Update{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
