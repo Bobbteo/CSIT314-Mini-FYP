@@ -20,7 +20,7 @@
             type="text"
             name="keyword"
             value="{{ keyword }}"
-            placeholder="Search by name, username, email, or role"
+            placeholder="Search by username, name, email, or role"
             class="search-input"
         >
         <button type="submit" class="search-btn">Search</button>
@@ -56,22 +56,39 @@
                             </span>
                         </td>
                         <td>{{ account.created_at }}</td>
-                        <td class="action-cell">
-                            {% if account.role == 'admin' %}
-                                <span class="protected-label">Protected</span>
-                            {% else %}
-                                <a href="{{ url_for('edit_account', account_id=account.account_id) }}" class="table-btn edit-btn">
-                                    Edit
-                                </a>
+                        <td>
+                            <div class="action-cell">
+                                {% if account.role == 'admin' %}
+                                    <span class="protected-label">Protected</span>
 
-                                {% if account.status != 'suspended' %}
-                                <form action="{{ url_for('suspend_account', account_id=account.account_id) }}" method="POST" style="display:inline;">
-                                    <button type="submit" class="table-btn suspend-btn">
-                                        Suspend
-                                    </button>
-                                </form>
+                                {% elif account.status == 'active' %}
+                                    <a href="{{ url_for('edit_account', account_id=account.account_id) }}" class="table-btn edit-btn">
+                                        Edit
+                                    </a>
+
+                                    <form action="{{ url_for('restrict_account', account_id=account.account_id) }}" method="POST" style="display:inline;">
+                                        <button type="submit" class="table-btn restrict-btn">Restrict</button>
+                                    </form>
+
+                                    <form action="{{ url_for('suspend_account', account_id=account.account_id) }}" method="POST" style="display:inline;">
+                                        <button type="submit" class="table-btn suspend-btn">Suspend</button>
+                                    </form>
+
+                                {% elif account.status == 'restricted' %}
+                                    <form action="{{ url_for('remove_restriction', account_id=account.account_id) }}" method="POST" style="display:inline;">
+                                        <button type="submit" class="table-btn edit-btn">Remove Restriction</button>
+                                    </form>
+
+                                    <form action="{{ url_for('suspend_account', account_id=account.account_id) }}" method="POST" style="display:inline;">
+                                        <button type="submit" class="table-btn suspend-btn">Suspend</button>
+                                    </form>
+
+                                {% elif account.status == 'suspended' %}
+                                    <form action="{{ url_for('remove_suspension', account_id=account.account_id) }}" method="POST" style="display:inline;">
+                                        <button type="submit" class="table-btn edit-btn">Remove Suspension</button>
+                                    </form>
                                 {% endif %}
-                            {% endif %}
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}

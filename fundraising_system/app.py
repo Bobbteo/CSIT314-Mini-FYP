@@ -2,14 +2,28 @@ from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from config import SECRET_KEY
 from control.loginC import LoginController
-from control.adminAccountC import AdminAccountController
-
+from control.readAccountC import ReadAccountController
+from control.searchAccountC import SearchAccountController
+from control.createAccountC import CreateAccountController
+from control.updateAccountC import UpdateAccountController
+from control.suspendAccountC import SuspendAccountController
+from control.restrictAccountC import RestrictAccountController
+from control.removeRestrictionC import RemoveRestrictionController
+from control.removeSuspensionC import RemoveSuspensionController
+from entity.account import Account
 
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
 
 login_controller = LoginController()
-admin_account_controller = AdminAccountController()
+read_account_controller = ReadAccountController()
+search_account_controller = SearchAccountController()
+create_account_controller = CreateAccountController()
+update_account_controller = UpdateAccountController()
+suspend_account_controller = SuspendAccountController()
+restrict_account_controller = RestrictAccountController()
+remove_restriction_controller = RemoveRestrictionController()
+remove_suspension_controller = RemoveSuspensionController()
 
 
 def login_required(f):
@@ -60,14 +74,14 @@ def login():
         username_or_email = request.form.get("username_or_email", "").strip()
         password = request.form.get("password", "").strip()
 
-        result = login_controller.authenticate(username_or_email, password)
+        result = login_controller.login(username_or_email, password)
 
         if result["success"]:
             account = result["account"]
             session["account_id"] = account.account_id
-            session["full_name"] = account.full_name
             session["username"] = account.username
-            session["role"] = result["role"]
+            session["full_name"] = account.full_name
+            session["role"] = account.role
             session["status"] = account.status
 
             flash(result["message"], "success")
@@ -77,20 +91,20 @@ def login():
 
     return render_template("login.html")
 
+'''
+---------- Login Functions ----------
+'''
 
 @app.route("/dashboard")
 @login_required
 def dashboard_redirect():
     role = session.get("role")
-    print("DEBUG role from session =", role)
-
-    dashboard_route = login_controller.get_dashboard_route(role)
-    print("DEBUG dashboard route =", dashboard_route)
+    dashboard_route = Account.get_dashboard_route(role)
 
     if dashboard_route:
         return redirect(url_for(dashboard_route))
 
-    flash(f"Unknown user role: {role}", "danger")
+    flash("Unknown user role.", "danger")
     return redirect(url_for("login"))
 
 '''
@@ -104,9 +118,9 @@ def admin_dashboard():
     keyword = request.args.get("keyword", "").strip()
 
     if keyword:
-        accounts = admin_account_controller.search_accounts(keyword)
+        accounts = search_account_controller.search_accounts(keyword)
     else:
-        accounts = admin_account_controller.get_all_accounts()
+        accounts = read_account_controller.read_accounts()
 
     return render_template(
         "admin_dashboard.html",
@@ -115,87 +129,88 @@ def admin_dashboard():
         keyword=keyword
     )
 
-
 @app.route("/admin/accounts/create", methods=["GET", "POST"])
 @login_required
 @role_required("admin")
-@restricted_block_required
 def create_account():
     if request.method == "POST":
-        full_name = request.form.get("full_name", "")
-        username = request.form.get("username", "")
-        email = request.form.get("email", "")
-        password = request.form.get("password", "")
-        role = request.form.get("role", "")
-        status = "active"
+        result = create_account_controller.create_account(request.form)
 
-        result = admin_account_controller.create_account(
-            full_name, username, email, password, role, status
-        )
+        flash(result["message"], "success" if result["success"] else "danger")
 
         if result["success"]:
-            flash(result["message"], "success")
             return redirect(url_for("admin_dashboard"))
-
-        flash(result["message"], "danger")
 
     return render_template(
         "admin_account_form.html",
         form_mode="create",
-        account=None
+        account=None,
+        selected_role=""
     )
 
 
 @app.route("/admin/accounts/<int:account_id>/edit", methods=["GET", "POST"])
 @login_required
 @role_required("admin")
-@restricted_block_required
 def edit_account(account_id):
-    account = admin_account_controller.get_account_by_id(account_id)
+    account = update_account_controller.get_account(account_id)
 
     if not account:
         flash("Account not found.", "danger")
         return redirect(url_for("admin_dashboard"))
 
-    selected_role = admin_account_controller.get_role_by_account_id(account_id)
-
-    if selected_role == "admin":
-        flash("The admin account cannot be edited.", "danger")
+    if account.role == "admin":
+        flash("Admin account cannot be edited.", "danger")
         return redirect(url_for("admin_dashboard"))
 
     if request.method == "POST":
-        full_name = request.form.get("full_name", "")
-        username = request.form.get("username", "")
-        email = request.form.get("email", "")
-        role = request.form.get("role", "")
-        status = request.form.get("status", "")
-        new_password = request.form.get("new_password", "")
+        result = update_account_controller.update_account(account_id, request.form)
 
-        result = admin_account_controller.update_account(
-            account_id, full_name, username, email, role, status, new_password
-        )
+        flash(result["message"], "success" if result["success"] else "danger")
 
         if result["success"]:
-            flash(result["message"], "success")
             return redirect(url_for("admin_dashboard"))
 
-        flash(result["message"], "danger")
-        selected_role = role
+        account = update_account_controller.get_account(account_id)
 
     return render_template(
         "admin_account_form.html",
         form_mode="edit",
         account=account,
-        selected_role=selected_role
+        selected_role=account.role
     )
 
+@app.route("/admin/accounts/<int:account_id>/restrict", methods=["POST"])
+@login_required
+@role_required("admin")
+def restrict_account(account_id):
+    result = restrict_account_controller.restrict_account(account_id)
+    flash(result["message"], "success" if result["success"] else "danger")
+    return redirect(url_for("admin_dashboard"))
+
+
+@app.route("/admin/accounts/<int:account_id>/remove-restriction", methods=["POST"])
+@login_required
+@role_required("admin")
+def remove_restriction(account_id):
+    result = remove_restriction_controller.remove_restriction(account_id)
+    flash(result["message"], "success" if result["success"] else "danger")
+    return redirect(url_for("admin_dashboard"))
 
 @app.route("/admin/accounts/<int:account_id>/suspend", methods=["POST"])
 @login_required
 @role_required("admin")
-@restricted_block_required
 def suspend_account(account_id):
-    result = admin_account_controller.suspend_account(account_id)
+    result = suspend_account_controller.suspend_account(account_id)
+
+    flash(result["message"], "success" if result["success"] else "danger")
+    return redirect(url_for("admin_dashboard"))
+
+@app.route("/admin/accounts/<int:account_id>/remove-suspension", methods=["POST"])
+@login_required
+@role_required("admin")
+def remove_suspension(account_id):
+    result = remove_suspension_controller.remove_suspension(account_id)
     flash(result["message"], "success" if result["success"] else "danger")
     return redirect(url_for("admin_dashboard"))
 

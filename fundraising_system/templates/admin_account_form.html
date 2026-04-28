@@ -55,17 +55,6 @@
             </select>
         </div>
 
-        {% if form_mode == 'edit' %}
-        <div class="form-group">
-            <label for="status">Account Status</label>
-            {% set selected_status = account.status if account else 'active' %}
-            <select id="status" name="status" required>
-                <option value="active" {% if selected_status == 'active' %}selected{% endif %}>Active</option>
-                <option value="restricted" {% if selected_status == 'restricted' %}selected{% endif %}>Restricted</option>
-                <option value="suspended" {% if selected_status == 'suspended' %}selected{% endif %}>Suspended</option>
-            </select>
-        </div>
-        {% endif %}
 
         <div class="form-actions">
             <a href="{{ url_for('admin_dashboard') }}" class="clear-btn">Back</a>
