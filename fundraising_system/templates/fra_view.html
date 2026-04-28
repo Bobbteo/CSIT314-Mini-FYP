@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}View FRA{% endblock %}
+
+{% block content %}
+<div class="card form-card">
+    <h1>{{ fra.title }}</h1>
+
+    <p><strong>Category:</strong> {{ fra.category }}</p>
+    <p><strong>Description:</strong> {{ fra.description }}</p>
+    <p><strong>Target Amount:</strong> ${{ "%.2f"|format(fra.target_amount) }}</p>
+    <p><strong>Current Amount:</strong> ${{ "%.2f"|format(fra.current_amount) }}</p>
+    <p><strong>Status:</strong> {{ fra.status }}</p>
+    <p><strong>Start Date:</strong> {{ fra.start_date }}</p>
+    <p><strong>End Date:</strong> {{ fra.end_date }}</p>
+
+    <div class="form-actions">
+        <a href="{{ url_for('doner_dashboard') }}" class="clear-btn">Back</a>
+
+        {% if not is_favourite %}
+        <form action="{{ url_for('add_favourite', fra_id=fra.fra_id) }}" method="POST">
+            <button type="submit" class="action-btn">Add to Favourite</button>
+        </form>
+        {% endif %}
+
+        {% if fra.status in ['active', 'goal_achieved'] %}
+            <a href="{{ url_for('donate_fra', fra_id=fra.fra_id) }}" class="action-btn">Donate</a>
+        {% else %}
+            <span class="protected-label">Donation Closed</span>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

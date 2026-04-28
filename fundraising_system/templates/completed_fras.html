@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Completed / Closed FRA{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="page-header">
+        <div>
+            <h1>Completed / Closed FRA</h1>
+            <p>View past fundraising activities and their statistics.</p>
+        </div>
+
+        <div>
+            <a href="{{ url_for('fundraiser_dashboard') }}" class="clear-btn">Back to Dashboard</a>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table class="account-table">
+            <thead>
+                <tr>
+                    <th>FRA ID</th>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Target</th>
+                    <th>Raised</th>
+                    <th>Status</th>
+                    <th>Views</th>
+                    <th>Favourites</th>
+                    <th>Start</th>
+                    <th>End</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% if completed_stats %}
+                    {% for item in completed_stats %}
+                    <tr>
+                        <td>{{ item.fra.fra_id }}</td>
+                        <td>{{ item.fra.title }}</td>
+                        <td>{{ item.fra.category }}</td>
+                        <td>${{ "%.2f"|format(item.fra.target_amount) }}</td>
+                        <td>${{ "%.2f"|format(item.fra.current_amount) }}</td>
+                        <td>
+                            <span class="status-badge status-{{ item.fra.status }}">
+                                {{ item.fra.status.replace('_', ' ').title() }}
+                            </span>
+                        </td>
+                        <td>{{ item.view_count }}</td>
+                        <td>{{ item.favourite_count }}</td>
+                        <td>{{ item.fra.start_date }}</td>
+                        <td>{{ item.fra.end_date }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="10" class="empty-row">No completed or closed FRA found.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

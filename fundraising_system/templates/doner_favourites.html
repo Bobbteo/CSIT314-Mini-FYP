@@ -1,33 +1,19 @@
 {% extends "base.html" %}
 
-{% block title %}Donee Dashboard{% endblock %}
+{% block title %}Favourite List{% endblock %}
 
 {% block content %}
 <div class="card">
     <div class="page-header">
         <div>
-            <h1>Donee Dashboard</h1>
-            <p>Welcome, {{ user_name }}.</p>
-            <p>Search and view fund raising activities.</p>
+            <h1>Favourite List</h1>
+            <p>Your saved fund raising activities.</p>
         </div>
 
-        <div class="dashboard-actions">
-            <a href="{{ url_for('doner_favourites') }}" class="action-btn">Favourite List</a>
-            <a href="{{ url_for('doner_donation_history') }}" class="action-btn">Donation History</a>
+        <div>
+            <a href="{{ url_for('doner_dashboard') }}" class="clear-btn">Back to Dashboard</a>
         </div>
     </div>
-
-    <form method="GET" action="{{ url_for('doner_dashboard') }}" class="search-form">
-        <input
-            type="text"
-            name="fra_keyword"
-            value="{{ fra_keyword }}"
-            placeholder="Search by title, category, description, or status"
-            class="search-input"
-        >
-        <button type="submit" class="search-btn">Search</button>
-        <a href="{{ url_for('doner_dashboard') }}" class="clear-btn">Clear</a>
-    </form>
 
     <div class="table-wrap">
         <table class="account-table">
@@ -44,8 +30,8 @@
             </thead>
 
             <tbody>
-                {% if fra_list %}
-                    {% for fra in fra_list %}
+                {% if favourites %}
+                    {% for fra in favourites %}
                     <tr>
                         <td>{{ fra.fra_id }}</td>
                         <td>{{ fra.title }}</td>
@@ -62,13 +48,17 @@
                                 <a href="{{ url_for('view_fra', fra_id=fra.fra_id) }}" class="table-btn edit-btn">
                                     View
                                 </a>
+
+                                <form action="{{ url_for('remove_favourite', fra_id=fra.fra_id) }}" method="POST">
+                                    <button type="submit" class="table-btn suspend-btn">Remove</button>
+                                </form>
                             </div>
                         </td>
                     </tr>
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="7" class="empty-row">No FRA found.</td>
+                        <td colspan="7" class="empty-row">No favourites yet.</td>
                     </tr>
                 {% endif %}
             </tbody>

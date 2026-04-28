@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if form_mode == 'create' %}Create FRA{% else %}Edit FRA{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="card form-card">
+    <h1>
+        {% if form_mode == 'create' %}
+            Create Fund Raising Activity
+        {% else %}
+            Edit Fund Raising Activity
+        {% endif %}
+    </h1>
+
+    <form method="POST">
+        <div class="form-group">
+            <label for="title">FRA Title</label>
+            <input
+                type="text"
+                id="title"
+                name="title"
+                value="{{ fra.title if fra else '' }}"
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" rows="5" required>{{ fra.description if fra else '' }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="category">Category</label>
+            <select id="category" name="category" required>
+                {% set selected_category = fra.category if fra else '' %}
+                <option value="">Select Category</option>
+                <option value="Medical" {% if selected_category == 'Medical' %}selected{% endif %}>Medical</option>
+                <option value="Education" {% if selected_category == 'Education' %}selected{% endif %}>Education</option>
+                <option value="Emergency" {% if selected_category == 'Emergency' %}selected{% endif %}>Emergency</option>
+                <option value="Community" {% if selected_category == 'Community' %}selected{% endif %}>Community</option>
+                <option value="Animal Welfare" {% if selected_category == 'Animal Welfare' %}selected{% endif %}>Animal Welfare</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="target_amount">Target Amount</label>
+            <input
+                type="number"
+                step="0.01"
+                min="1"
+                id="target_amount"
+                name="target_amount"
+                value="{{ fra.target_amount if fra else '' }}"
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="start_date">Start Date</label>
+            <input
+                type="date"
+                id="start_date"
+                name="start_date"
+                value="{{ fra.start_date if fra else '' }}"
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="end_date">End Date</label>
+            <input
+                type="date"
+                id="end_date"
+                name="end_date"
+                value="{{ fra.end_date if fra else '' }}"
+                required
+            >
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('fundraiser_dashboard') }}" class="clear-btn">Back</a>
+            <button type="submit" class="action-btn">
+                {% if form_mode == 'create' %}Create{% else %}Update{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

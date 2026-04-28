@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}FRA Statistics{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="page-header">
+        <div>
+            <h1>FRA Statistics</h1>
+            <p>View statistics for your current fund raising activities.</p>
+        </div>
+
+        <div>
+            <a href="{{ url_for('fundraiser_dashboard') }}" class="clear-btn">Back to Dashboard</a>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table class="account-table">
+            <thead>
+                <tr>
+                    <th>FRA ID</th>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Target</th>
+                    <th>Raised</th>
+                    <th>Status</th>
+                    <th>Views</th>
+                    <th>Favourites</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% if stats %}
+                    {% for item in stats %}
+                    <tr>
+                        <td>{{ item.fra.fra_id }}</td>
+                        <td>{{ item.fra.title }}</td>
+                        <td>{{ item.fra.category }}</td>
+                        <td>${{ "%.2f"|format(item.fra.target_amount) }}</td>
+                        <td>${{ "%.2f"|format(item.fra.current_amount) }}</td>
+                        <td>
+                            <span class="status-badge status-{{ item.fra.status }}">
+                                {{ item.fra.status.replace('_', ' ').title() }}
+                            </span>
+                        </td>
+                        <td>{{ item.view_count }}</td>
+                        <td>{{ item.favourite_count }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" class="empty-row">No FRA statistics found.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

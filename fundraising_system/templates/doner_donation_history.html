@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Donation History{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="page-header">
+        <div>
+            <h1>Donation History</h1>
+            <p>Search and view your previous donations.</p>
+        </div>
+
+        <div>
+            <a href="{{ url_for('doner_dashboard') }}" class="clear-btn">Back to Dashboard</a>
+        </div>
+    </div>
+
+    <form method="GET" action="{{ url_for('doner_donation_history') }}" class="search-form">
+        <input
+            type="text"
+            name="donation_keyword"
+            value="{{ donation_keyword }}"
+            placeholder="Search by FRA, category, amount, or date"
+            class="search-input"
+        >
+        <button type="submit" class="search-btn">Search</button>
+        <a href="{{ url_for('doner_donation_history') }}" class="clear-btn">Clear</a>
+    </form>
+
+    <div class="table-wrap">
+        <table class="account-table">
+            <thead>
+                <tr>
+                    <th>Donation ID</th>
+                    <th>FRA</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th>Donated At</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% if donation_history %}
+                    {% for donation in donation_history %}
+                    <tr>
+                        <td>{{ donation.donation_id }}</td>
+                        <td>{{ donation.title }}</td>
+                        <td>{{ donation.category }}</td>
+                        <td>${{ "%.2f"|format(donation.amount) }}</td>
+                        <td>{{ donation.donated_at }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="empty-row">No donation history found.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

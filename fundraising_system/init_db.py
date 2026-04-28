@@ -71,6 +71,52 @@ def init_database():
             """, (admin_account_id, "admin"))
             print("Admin profile created.")
 
+    # FRA Table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS FundRaisingActivity (
+        fra_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        fundraiser_account_id INTEGER NOT NULL,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        category TEXT NOT NULL,
+        target_amount REAL NOT NULL,
+        current_amount REAL NOT NULL DEFAULT 0,
+        view_count INTEGER NOT NULL DEFAULT 0,
+        status TEXT NOT NULL DEFAULT 'active'
+        CHECK(status IN ('active', 'goal_achieved', 'completed', 'closed', 'cancelled')),
+        start_date TEXT NOT NULL,
+        end_date TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (fundraiser_account_id) REFERENCES Account(account_id)
+    )
+    """)
+
+    # Favourite Table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS Favourite (
+        favourite_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        doner_account_id INTEGER NOT NULL,
+        fra_id INTEGER NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(doner_account_id, fra_id),
+        FOREIGN KEY (doner_account_id) REFERENCES Account(account_id),
+        FOREIGN KEY (fra_id) REFERENCES FundRaisingActivity(fra_id)
+    )
+    """)
+
+    # Donation Table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS Donation (
+        donation_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        doner_account_id INTEGER NOT NULL,
+        fra_id INTEGER NOT NULL,
+        amount REAL NOT NULL,
+        donated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (doner_account_id) REFERENCES Account(account_id),
+        FOREIGN KEY (fra_id) REFERENCES FundRaisingActivity(fra_id)
+    )
+    """)
+
     conn.commit()
     conn.close()
     print("Database ready.")
