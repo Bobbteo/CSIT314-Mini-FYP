@@ -5,14 +5,38 @@
 {% block content %}
 <div class="card form-card">
     <h1>{{ fra.title }}</h1>
+    <p class="subtitle">Campaign details and donation actions.</p>
 
-    <p><strong>Category:</strong> {{ fra.category }}</p>
-    <p><strong>Description:</strong> {{ fra.description }}</p>
-    <p><strong>Target Amount:</strong> ${{ "%.2f"|format(fra.target_amount) }}</p>
-    <p><strong>Current Amount:</strong> ${{ "%.2f"|format(fra.current_amount) }}</p>
-    <p><strong>Status:</strong> {{ fra.status }}</p>
-    <p><strong>Start Date:</strong> {{ fra.start_date }}</p>
-    <p><strong>End Date:</strong> {{ fra.end_date }}</p>
+    <div class="detail-list">
+        <div class="detail-item">
+            <div class="detail-label">Category</div>
+            <div class="detail-value">{{ fra.category }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Description</div>
+            <div class="detail-value">{{ fra.description }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Target Amount</div>
+            <div class="detail-value">${{ "%.2f"|format(fra.target_amount) }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Current Amount</div>
+            <div class="detail-value">${{ "%.2f"|format(fra.current_amount) }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Status</div>
+            <div class="detail-value">{{ fra.status.replace('_', ' ').title() }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Start Date</div>
+            <div class="detail-value">{{ fra.start_date }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">End Date</div>
+            <div class="detail-value">{{ fra.end_date }}</div>
+        </div>
+    </div>
 
     <div class="form-actions">
         <a href="{{ url_for('doner_dashboard') }}" class="clear-btn">Back</a>

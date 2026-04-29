@@ -5,11 +5,18 @@
 {% block content %}
 <div class="card form-card">
     <h1>Fake Payment Site</h1>
-    <p>You are donating to:</p>
-    <h2>{{ fra.title }}</h2>
+    <p class="subtitle">You are donating to <strong>{{ fra.title }}</strong>.</p>
 
-    <p><strong>Current Raised:</strong> ${{ "%.2f"|format(fra.current_amount) }}</p>
-    <p><strong>Target:</strong> ${{ "%.2f"|format(fra.target_amount) }}</p>
+    <div class="detail-list">
+        <div class="detail-item">
+            <div class="detail-label">Current Raised</div>
+            <div class="detail-value">${{ "%.2f"|format(fra.current_amount) }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Target Amount</div>
+            <div class="detail-value">${{ "%.2f"|format(fra.target_amount) }}</div>
+        </div>
+    </div>
 
     <form method="POST">
         <div class="form-group">

@@ -13,6 +13,13 @@
             Edit Account
         {% endif %}
     </h1>
+    <p class="subtitle">
+        {% if form_mode == 'create' %}
+            Add a new platform user with role access.
+        {% else %}
+            Update account information and role assignment.
+        {% endif %}
+    </p>
 
     <form method="POST">
         <div class="form-group">

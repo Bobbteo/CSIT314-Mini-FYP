@@ -32,6 +32,11 @@ def init_database():
     )
     """)
 
+    # Detect legacy schema where Account.role exists and is NOT NULL.
+    cursor.execute("PRAGMA table_info(Account)")
+    account_columns = [row[1] for row in cursor.fetchall()]
+    has_account_role_column = "role" in account_columns
+
     # Check if admin account already exists
     cursor.execute("SELECT account_id FROM Account WHERE username = ?", ("admin",))
     existing_admin = cursor.fetchone()
@@ -39,16 +44,29 @@ def init_database():
     if existing_admin is None:
         password_hash = generate_password_hash("admin")
 
-        cursor.execute("""
-            INSERT INTO Account (username, full_name, email, password_hash, status)
-            VALUES (?, ?, ?, ?, ?)
-        """, (
-            "admin",
-            "admin",
-            "-",
-            password_hash,
-            "active"
-        ))
+        if has_account_role_column:
+            cursor.execute("""
+                INSERT INTO Account (username, full_name, email, password_hash, status, role)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (
+                "admin",
+                "admin",
+                "-",
+                password_hash,
+                "active",
+                "admin"
+            ))
+        else:
+            cursor.execute("""
+                INSERT INTO Account (username, full_name, email, password_hash, status)
+                VALUES (?, ?, ?, ?, ?)
+            """, (
+                "admin",
+                "admin",
+                "-",
+                password_hash,
+                "active"
+            ))
 
         admin_account_id = cursor.lastrowid
 

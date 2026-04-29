@@ -4,8 +4,27 @@
 
 {% block content %}
 <div class="card">
-    <h1>Platform Manager Dashboard</h1>
-    <p>Welcome, {{ user_name }}.</p>
-    <p>This page is for platform management and reporting.</p>
+    <div class="page-header">
+        <div>
+            <h1>Platform Manager Dashboard</h1>
+            <p>Welcome, {{ user_name }}.</p>
+            <p>Overview of platform governance and reporting tools.</p>
+        </div>
+    </div>
+
+    <div class="manager-grid">
+        <div class="manager-panel">
+            <h3>Account Governance</h3>
+            <p>Monitor user account health, restrictions, and suspension trends.</p>
+        </div>
+        <div class="manager-panel">
+            <h3>Fundraising Quality</h3>
+            <p>Review activity quality signals and campaign lifecycle outcomes.</p>
+        </div>
+        <div class="manager-panel">
+            <h3>Reporting</h3>
+            <p>Track engagement snapshots and donation movement across the platform.</p>
+        </div>
+    </div>
 </div>
 {% endblock %}
