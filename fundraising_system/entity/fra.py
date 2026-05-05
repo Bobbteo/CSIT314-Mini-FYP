@@ -218,7 +218,7 @@ class FRA:
 
     @staticmethod
     def search_fra(fundraiser_account_id, keyword):
-        keyword = keyword.strip().lower()
+        keyword = keyword.strip()
 
         if not keyword:
             return FRA.get_by_fundraiser(fundraiser_account_id)
@@ -253,7 +253,7 @@ class FRA:
 
     @staticmethod
     def search_public_fras(keyword):
-        keyword = keyword.strip().lower()
+        keyword = keyword.strip()
 
         if not keyword:
             return FRA.get_public_fras()

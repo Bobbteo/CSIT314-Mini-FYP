@@ -26,37 +26,40 @@
         <button type="submit" class="search-btn">Search</button>
         <a href="{{ url_for('doner_donation_history') }}" class="clear-btn">Clear</a>
     </form>
-
-    <div class="table-wrap">
-        <table class="account-table">
-            <thead>
-                <tr>
-                    <th>Donation ID</th>
-                    <th>FRA</th>
-                    <th>Category</th>
-                    <th>Amount</th>
-                    <th>Donated At</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {% if donation_history %}
-                    {% for donation in donation_history %}
+    <div class="table-container">
+        <div class="table-scroll-top"><div></div></div>
+        
+        <div class="table-wrap">
+            <table class="account-table">
+                <thead>
                     <tr>
-                        <td>{{ donation.donation_id }}</td>
-                        <td>{{ donation.title }}</td>
-                        <td>{{ donation.category }}</td>
-                        <td>${{ "%.2f"|format(donation.amount) }}</td>
-                        <td>{{ donation.donated_at }}</td>
+                        <th>Donation ID</th>
+                        <th>FRA</th>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Donated At</th>
                     </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="5" class="empty-row">No donation history found.</td>
-                    </tr>
-                {% endif %}
-            </tbody>
-        </table>
+                </thead>
+
+                <tbody>
+                    {% if donation_history %}
+                        {% for donation in donation_history %}
+                        <tr>
+                            <td>{{ donation.donation_id }}</td>
+                            <td>{{ donation.title }}</td>
+                            <td>{{ donation.category }}</td>
+                            <td>${{ "%.2f"|format(donation.amount) }}</td>
+                            <td>{{ donation.donated_at }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="empty-row">No donation history found.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 {% endblock %}

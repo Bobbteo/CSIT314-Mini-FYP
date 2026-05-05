@@ -36,11 +36,13 @@
             <select id="category" name="category" required>
                 {% set selected_category = fra.category if fra else '' %}
                 <option value="">Select Category</option>
-                <option value="Medical" {% if selected_category == 'Medical' %}selected{% endif %}>Medical</option>
-                <option value="Education" {% if selected_category == 'Education' %}selected{% endif %}>Education</option>
-                <option value="Emergency" {% if selected_category == 'Emergency' %}selected{% endif %}>Emergency</option>
-                <option value="Community" {% if selected_category == 'Community' %}selected{% endif %}>Community</option>
-                <option value="Animal Welfare" {% if selected_category == 'Animal Welfare' %}selected{% endif %}>Animal Welfare</option>
+
+                {% for category in categories %}
+                    <option value="{{ category.category_name }}"
+                        {% if selected_category == category.category_name %}selected{% endif %}>
+                        {{ category.category_name }}
+                    </option>
+                {% endfor %}
             </select>
         </div>
 

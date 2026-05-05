@@ -229,8 +229,9 @@ input[type="password"] {
 }
 
 .clear-btn {
-    background: #adb5bd;
+    background-color: #1d4ed8;
     color: white;
+    font-weight: bold;
 }
 
 .edit-btn {
@@ -259,12 +260,15 @@ input[type="password"] {
 }
 
 .table-wrap {
+    width: 100%;
     overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
 }
 
 .account-table {
     width: 100%;
-    max-width: 1100px;
+    min-width: 1000px;
     border-collapse: collapse;
 }
 
@@ -275,6 +279,7 @@ input[type="password"] {
     text-align: left;
     vertical-align: middle;
     height: 60px;
+    white-space: nowrap;
 }
 
 .account-table th:last-child,
@@ -398,4 +403,52 @@ textarea {
 .status-cancelled {
     background: #fee2e2;
     color: #991b1b;
+}
+
+.report-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin: 24px 0;
+}
+
+.report-card {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 18px;
+}
+
+.report-card h3 {
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 10px;
+}
+
+.report-card p {
+    font-size: 28px;
+    font-weight: bold;
+    color: #1d3557;
+}
+
+.table-wrap::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-wrap::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.table-container {
+    width: 100%;
+}
+
+.table-scroll-top {
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.table-scroll-top div {
+    height: 1px; /* invisible but needed */
 }

@@ -14,55 +14,58 @@
             <a href="{{ url_for('doner_dashboard') }}" class="clear-btn">Back to Dashboard</a>
         </div>
     </div>
-
-    <div class="table-wrap">
-        <table class="account-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Title</th>
-                    <th>Category</th>
-                    <th>Target</th>
-                    <th>Raised</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {% if favourites %}
-                    {% for fra in favourites %}
+    <div class="table-container">
+        <div class="table-scroll-top"><div></div></div>
+        
+        <div class="table-wrap">
+            <table class="account-table">
+                <thead>
                     <tr>
-                        <td>{{ fra.fra_id }}</td>
-                        <td>{{ fra.title }}</td>
-                        <td>{{ fra.category }}</td>
-                        <td>${{ "%.2f"|format(fra.target_amount) }}</td>
-                        <td>${{ "%.2f"|format(fra.current_amount) }}</td>
-                        <td>
-                            <span class="status-badge status-{{ fra.status }}">
-                                {{ fra.status.replace('_', ' ').title() }}
-                            </span>
-                        </td>
-                        <td>
-                            <div class="action-cell">
-                                <a href="{{ url_for('view_fra', fra_id=fra.fra_id) }}" class="table-btn edit-btn">
-                                    View
-                                </a>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Target</th>
+                        <th>Raised</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
 
-                                <form action="{{ url_for('remove_favourite', fra_id=fra.fra_id) }}" method="POST">
-                                    <button type="submit" class="table-btn suspend-btn">Remove</button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="7" class="empty-row">No favourites yet.</td>
-                    </tr>
-                {% endif %}
-            </tbody>
-        </table>
+                <tbody>
+                    {% if favourites %}
+                        {% for fra in favourites %}
+                        <tr>
+                            <td>{{ fra.fra_id }}</td>
+                            <td>{{ fra.title }}</td>
+                            <td>{{ fra.category }}</td>
+                            <td>${{ "%.2f"|format(fra.target_amount) }}</td>
+                            <td>${{ "%.2f"|format(fra.current_amount) }}</td>
+                            <td>
+                                <span class="status-badge status-{{ fra.status }}">
+                                    {{ fra.status.replace('_', ' ').title() }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="action-cell">
+                                    <a href="{{ url_for('view_fra', fra_id=fra.fra_id) }}" class="table-btn edit-btn">
+                                        View
+                                    </a>
+
+                                    <form action="{{ url_for('remove_favourite', fra_id=fra.fra_id) }}" method="POST">
+                                        <button type="submit" class="table-btn suspend-btn">Remove</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="empty-row">No favourites yet.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 {% endblock %}

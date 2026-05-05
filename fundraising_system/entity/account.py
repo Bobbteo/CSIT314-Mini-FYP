@@ -118,7 +118,7 @@ class Account:
 
     @staticmethod
     def search_accounts(keyword):
-        keyword = keyword.strip().lower()
+        keyword = keyword.strip()
 
         if not keyword:
             return Account.get_all_accounts()

@@ -8,6 +8,27 @@
     {% block extra_head %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
+    <script>
+    document.querySelectorAll('.table-container').forEach(container => {
+        const topScroll = container.querySelector('.table-scroll-top');
+        const bottomScroll = container.querySelector('.table-wrap');
+        const table = container.querySelector('table');
+
+        if (!table) return;
+
+        // match width
+        topScroll.firstElementChild.style.width = table.scrollWidth + 'px';
+
+        // sync scroll
+        topScroll.addEventListener('scroll', () => {
+            bottomScroll.scrollLeft = topScroll.scrollLeft;
+        });
+
+        bottomScroll.addEventListener('scroll', () => {
+            topScroll.scrollLeft = bottomScroll.scrollLeft;
+        });
+    });
+    </script>
     {% block site_nav %}
     <nav class="navbar">
         <div class="nav-left">

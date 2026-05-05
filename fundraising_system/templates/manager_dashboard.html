@@ -1,11 +1,152 @@
 {% extends "base.html" %}
 
-{% block title %}Platform Manager Dashboard{% endblock %}
+{% block title %}Manager Dashboard{% endblock %}
 
 {% block content %}
+{% if view == 'categories' %}
 <div class="card">
-    <h1>Platform Manager Dashboard</h1>
-    <p>Welcome, {{ user_name }}.</p>
-    <p>This page is for platform management and reporting.</p>
+    <div class="page-header">
+        <div>
+            <h1>FRA Categories</h1>
+            <p>Manage FRA categories.</p>
+        </div>
+
+        <div class="dashboard-actions">
+            <a href="{{ url_for('create_category') }}" class="action-btn">+ Create Category</a>
+            <a href="{{ url_for('manager_dashboard', view='reports') }}" class="clear-btn">Reports</a>
+        </div>
+    </div>
+    <div class="table-container">
+        <div class="table-scroll-top"><div></div></div>
+        
+        <div class="table-wrap">
+            <table class="account-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Category Name</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Created At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for category in categories %}
+                    <tr>
+                        <td>{{ category.category_id }}</td>
+                        <td>{{ category.category_name }}</td>
+                        <td>{{ category.description }}</td>
+                        <td>
+                            <span class="status-badge status-{{ category.status }}">
+                                {{ category.status.replace('_', ' ').title() }}
+                            </span>
+                        </td>
+                        <td>{{ category.created_at }}</td>
+                        <td>
+                            <div class="action-cell">
+                                {% if category.status == 'active' %}
+                                    <a href="{{ url_for('edit_category', category_id=category.category_id) }}" class="table-btn edit-btn">Edit</a>
+
+                                    <form action="{{ url_for('deactivate_category', category_id=category.category_id) }}" method="POST">
+                                        <button type="submit" class="table-btn suspend-btn">Deactivate</button>
+                                    </form>
+                                {% else %}
+                                    <form action="{{ url_for('reactivate_category', category_id=category.category_id) }}" method="POST">
+                                        <button type="submit" class="table-btn edit-btn">Reactivate</button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
+{% elif view == 'reports' %}
+<div class="card">
+    <div class="page-header">
+        <div>
+            <h1>Manager Dashboard</h1>
+            <p>Website activity reports.</p>
+        </div>
+
+        <div class="dashboard-actions">
+            <a href="{{ url_for('manager_dashboard', view='reports') }}"
+               class="action-btn {% if view == 'reports' %}active-btn{% endif %}">
+                Reports
+            </a>
+
+            <a href="{{ url_for('manager_dashboard', view='categories') }}"
+               class="action-btn {% if view == 'categories' %}active-btn{% endif %}">
+                Categories
+            </a>
+        </div>
+    </div>
+
+    <h2>Daily Report</h2>
+    <p>Period: {{ daily_report.start_date }} to {{ daily_report.end_date }}</p>
+
+    <form method="GET" action="{{ url_for('manager_dashboard') }}" class="search-form">
+        <input type="hidden" name="view" value="reports">
+        <input type="date" name="daily_date" value="{{ daily_date }}" class="search-input">
+        <input type="hidden" name="weekly_start" value="{{ weekly_start }}">
+        <input type="hidden" name="monthly_month" value="{{ monthly_month }}">
+        <button type="submit" class="search-btn">Generate Daily</button>
+    </form>
+
+    <div class="report-grid">
+        <div class="report-card"><h3>New Accounts</h3><p>{{ daily_report.new_accounts }}</p></div>
+        <div class="report-card"><h3>New FRA</h3><p>{{ daily_report.new_fras }}</p></div>
+        <div class="report-card"><h3>Donations</h3><p>{{ daily_report.period_donations }}</p></div>
+        <div class="report-card"><h3>Amount Raised</h3><p>${{ "%.2f"|format(daily_report.period_amount) }}</p></div>
+        <div class="report-card"><h3>New Favourites</h3><p>{{ daily_report.period_favourites }}</p></div>
+    </div>
+
+    <hr>
+
+    <h2>Weekly Report</h2>
+    <p>Period: {{ weekly_report.start_date }} to {{ weekly_report.end_date }}</p>
+
+    <form method="GET" action="{{ url_for('manager_dashboard') }}" class="search-form">
+        <input type="hidden" name="view" value="reports">
+        <input type="hidden" name="daily_date" value="{{ daily_date }}">
+        <input type="date" name="weekly_start" value="{{ weekly_start }}" class="search-input">
+        <input type="hidden" name="monthly_month" value="{{ monthly_month }}">
+        <button type="submit" class="search-btn">Generate Weekly</button>
+    </form>
+
+    <div class="report-grid">
+        <div class="report-card"><h3>New Accounts</h3><p>{{ weekly_report.new_accounts }}</p></div>
+        <div class="report-card"><h3>New FRA</h3><p>{{ weekly_report.new_fras }}</p></div>
+        <div class="report-card"><h3>Donations</h3><p>{{ weekly_report.period_donations }}</p></div>
+        <div class="report-card"><h3>Amount Raised</h3><p>${{ "%.2f"|format(weekly_report.period_amount) }}</p></div>
+        <div class="report-card"><h3>New Favourites</h3><p>{{ weekly_report.period_favourites }}</p></div>
+    </div>
+
+    <hr>
+
+    <h2>Monthly Report</h2>
+    <p>Period: {{ monthly_report.start_date }} to {{ monthly_report.end_date }}</p>
+
+    <form method="GET" action="{{ url_for('manager_dashboard') }}" class="search-form">
+        <input type="hidden" name="view" value="reports">
+        <input type="hidden" name="daily_date" value="{{ daily_date }}">
+        <input type="hidden" name="weekly_start" value="{{ weekly_start }}">
+        <input type="month" name="monthly_month" value="{{ monthly_month }}" class="search-input">
+        <button type="submit" class="search-btn">Generate Monthly</button>
+    </form>
+
+    <div class="report-grid">
+        <div class="report-card"><h3>New Accounts</h3><p>{{ monthly_report.new_accounts }}</p></div>
+        <div class="report-card"><h3>New FRA</h3><p>{{ monthly_report.new_fras }}</p></div>
+        <div class="report-card"><h3>Donations</h3><p>{{ monthly_report.period_donations }}</p></div>
+        <div class="report-card"><h3>Amount Raised</h3><p>${{ "%.2f"|format(monthly_report.period_amount) }}</p></div>
+        <div class="report-card"><h3>New Favourites</h3><p>{{ monthly_report.period_favourites }}</p></div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}

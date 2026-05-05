@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if form_mode == 'create' %}Create Category{% else %}Edit Category{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="card form-card">
+    <h1>
+        {% if form_mode == 'create' %}
+            Create FRA Category
+        {% else %}
+            Edit FRA Category
+        {% endif %}
+    </h1>
+
+    <form method="POST">
+        <div class="form-group">
+            <label for="category_name">Category Name</label>
+            <input
+                type="text"
+                id="category_name"
+                name="category_name"
+                value="{{ category.category_name if category else '' }}"
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" rows="5">{{ category.description if category else '' }}</textarea>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('manager_dashboard') }}" class="clear-btn">Back</a>
+            <button type="submit" class="action-btn">
+                {% if form_mode == 'create' %}Create{% else %}Update{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

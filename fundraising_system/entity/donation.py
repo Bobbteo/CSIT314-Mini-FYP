@@ -59,7 +59,7 @@ class Donation:
     
     @staticmethod
     def search_donation_history(doner_account_id, keyword):
-        keyword = keyword.strip().lower()
+        keyword = keyword.strip()
 
         if not keyword:
             return Donation.get_donation_history(doner_account_id)

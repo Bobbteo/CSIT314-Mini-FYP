@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Reports{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="page-header">
+        <div>
+            <h1>{{ report_type.title() }} Report</h1>
+            <p>Report period: {{ report.start_date }} to {{ report.end_date }}</p>
+        </div>
+
+        <div class="dashboard-actions">
+            <a href="{{ url_for('manager_dashboard') }}" class="clear-btn">Back</a>
+            <a href="{{ url_for('reports', type='daily') }}" class="action-btn">Daily</a>
+            <a href="{{ url_for('reports', type='weekly') }}" class="action-btn">Weekly</a>
+            <a href="{{ url_for('reports', type='monthly') }}" class="action-btn">Monthly</a>
+        </div>
+    </div>
+
+    <div class="report-grid">
+        <div class="report-card">
+            <h3>Total Accounts</h3>
+            <p>{{ report.total_accounts }}</p>
+        </div>
+
+        <div class="report-card">
+            <h3>New Accounts</h3>
+            <p>{{ report.new_accounts }}</p>
+        </div>
+
+        <div class="report-card">
+            <h3>Total FRA</h3>
+            <p>{{ report.total_fras }}</p>
+        </div>
+
+        <div class="report-card">
+            <h3>New FRA</h3>
+            <p>{{ report.new_fras }}</p>
+        </div>
+
+        <div class="report-card">
+            <h3>Total Donations</h3>
+            <p>{{ report.total_donations }}</p>
+        </div>
+
+        <div class="report-card">
+            <h3>Period Donations</h3>
+            <p>{{ report.period_donations }}</p>
+        </div>
+
+        <div class="report-card">
+            <h3>Amount Raised</h3>
+            <p>${{ "%.2f"|format(report.period_amount) }}</p>
+        </div>
+
+        <div class="report-card">
+            <h3>New Favourites</h3>
+            <p>{{ report.period_favourites }}</p>
+        </div>
+    </div>
+
+    <h2>Top FRA Categories</h2>
+    <div class="table-container">
+        <div class="table-scroll-top"><div></div></div>
+        
+        <div class="table-wrap">
+            <table class="account-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Number of FRA</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if report.top_categories %}
+                        {% for category in report.top_categories %}
+                        <tr>
+                            <td>{{ category.category }}</td>
+                            <td>{{ category.fra_count }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="2" class="empty-row">No category data found.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,6 +1,7 @@
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from config import SECRET_KEY
+from datetime import date
 from control.loginC import LoginController
 from control.readAccountC import ReadAccountController
 from control.searchAccountC import SearchAccountController
@@ -29,6 +30,14 @@ from control.readFraStatisticsC import ReadFraStatisticsController
 from control.readCompletedFraC import ReadCompletedFraController
 from entity.favourite import Favourite
 from entity.fra import FRA
+from control.readCategoryC import ReadCategoryController
+from control.createCategoryC import CreateCategoryController
+from control.updateCategoryC import UpdateCategoryController
+from control.disableCategoryC import DisableCategoryController
+from control.dailyReportC import DailyReportController
+from control.weeklyReportC import WeeklyReportController
+from control.monthlyReportC import MonthlyReportController
+from control.readActiveCategoryC import ReadActiveCategoryController
 
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
@@ -58,6 +67,14 @@ read_donation_history_controller = ReadDonationHistoryController()
 search_donation_history_controller = SearchDonationHistoryController()
 read_fra_statistics_controller = ReadFraStatisticsController()
 read_completed_fra_controller = ReadCompletedFraController()
+read_category_controller = ReadCategoryController()
+create_category_controller = CreateCategoryController()
+update_category_controller = UpdateCategoryController()
+disable_category_controller = DisableCategoryController()
+daily_report_controller = DailyReportController()
+weekly_report_controller = WeeklyReportController()
+monthly_report_controller = MonthlyReportController()
+read_active_category_controller = ReadActiveCategoryController()
 
 
 def login_required(f):
@@ -149,7 +166,7 @@ def dashboard_redirect():
 @login_required
 @role_required("admin")
 def admin_dashboard():
-    keyword = request.args.get("keyword", "").strip()
+    keyword = request.args.get("keyword", "").strip().lower()
 
     if keyword:
         accounts = search_account_controller.search_accounts(keyword)
@@ -256,7 +273,7 @@ def remove_suspension(account_id):
 @login_required
 @role_required("fundraiser")
 def fundraiser_dashboard():
-    keyword = request.args.get("keyword", "").strip()
+    keyword = request.args.get("keyword", "").strip().lower()
     fundraiser_account_id = session.get("account_id")
 
     if keyword:
@@ -283,11 +300,14 @@ def create_fra():
 
         if result["success"]:
             return redirect(url_for("fundraiser_dashboard"))
+        
+    categories = read_active_category_controller.read_active_categories()
 
     return render_template(
         "fra_form.html",
         form_mode="create",
-        fra=None
+        fra=None,
+        categories=categories
     )
 
 
@@ -320,10 +340,13 @@ def edit_fra(fra_id):
 
         fra = update_fra_controller.get_fra(fra_id)
 
+    categories = read_active_category_controller.read_active_categories()
+
     return render_template(
         "fra_form.html",
         form_mode="edit",
-        fra=fra
+        fra=fra,
+        categories=categories
     )
 
 
@@ -378,6 +401,7 @@ def completed_fras():
         "completed_fras.html",
         completed_stats=completed_stats
     )
+
 '''
 ---------- Doner Functions ----------
 '''
@@ -386,7 +410,7 @@ def completed_fras():
 @login_required
 @role_required("doner")
 def doner_dashboard():
-    fra_keyword = request.args.get("fra_keyword", "").strip()
+    fra_keyword = request.args.get("fra_keyword", "").strip().lower()
 
     fra_list = search_public_fra_controller.search_fra(fra_keyword)
 
@@ -412,7 +436,7 @@ def doner_favourites():
 @login_required
 @role_required("doner")
 def doner_donation_history():
-    donation_keyword = request.args.get("donation_keyword", "").strip()
+    donation_keyword = request.args.get("donation_keyword", "").strip().lower()
     doner_account_id = session.get("account_id")
 
     if donation_keyword:
@@ -507,8 +531,114 @@ def donate_fra(fra_id):
 @login_required
 @role_required("manager")
 def manager_dashboard():
-    return render_template("manager_dashboard.html", user_name=session.get("full_name"))
+    view = request.args.get("view", "reports")
 
+    if view == "categories":
+        categories = read_category_controller.read_categories()
+        return render_template(
+            "manager_dashboard.html",
+            view="categories",
+            categories=categories
+        )
+
+    today = date.today().isoformat()
+    current_month = today[:7]
+
+    daily_date = request.args.get("daily_date", today)
+    weekly_start = request.args.get("weekly_start", today)
+    monthly_month = request.args.get("monthly_month", current_month)
+
+    daily_report = daily_report_controller.generate_daily_report(daily_date)
+    weekly_report = weekly_report_controller.generate_weekly_report(weekly_start)
+    monthly_report = monthly_report_controller.generate_monthly_report(monthly_month)
+
+    return render_template(
+        "manager_dashboard.html",
+        view="reports",
+        daily_report=daily_report,
+        weekly_report=weekly_report,
+        monthly_report=monthly_report,
+        daily_date=daily_date,
+        weekly_start=weekly_start,
+        monthly_month=monthly_month
+    )
+
+
+@app.route("/manager/categories/create", methods=["GET", "POST"])
+@login_required
+@role_required("manager")
+@restricted_block_required
+def create_category():
+    if request.method == "POST":
+        result = create_category_controller.create_category(request.form)
+        flash(result["message"], "success" if result["success"] else "danger")
+
+        if result["success"]:
+            return redirect(url_for("manager_dashboard"))
+
+    return render_template("category_form.html", form_mode="create", category=None)
+
+
+@app.route("/manager/categories/<int:category_id>/edit", methods=["GET", "POST"])
+@login_required
+@role_required("manager")
+@restricted_block_required
+def edit_category(category_id):
+    category = update_category_controller.get_category(category_id)
+
+    if not category:
+        flash("Category not found.", "danger")
+        return redirect(url_for("manager_dashboard"))
+
+    if request.method == "POST":
+        result = update_category_controller.update_category(category_id, request.form)
+        flash(result["message"], "success" if result["success"] else "danger")
+
+        if result["success"]:
+            return redirect(url_for("manager_dashboard"))
+
+    return render_template("category_form.html", form_mode="edit", category=category)
+
+
+@app.route("/manager/categories/<int:category_id>/deactivate", methods=["POST"])
+@login_required
+@role_required("manager")
+@restricted_block_required
+def deactivate_category(category_id):
+    result = disable_category_controller.deactivate_category(category_id)
+    flash(result["message"], "success" if result["success"] else "danger")
+    return redirect(url_for("manager_dashboard"))
+
+
+@app.route("/manager/categories/<int:category_id>/reactivate", methods=["POST"])
+@login_required
+@role_required("manager")
+@restricted_block_required
+def reactivate_category(category_id):
+    result = disable_category_controller.reactivate_category(category_id)
+    flash(result["message"], "success" if result["success"] else "danger")
+    return redirect(url_for("manager_dashboard"))
+
+
+@app.route("/manager/reports")
+@login_required
+@role_required("manager")
+def reports():
+    report_type = request.args.get("type", "daily")
+
+    if report_type == "weekly":
+        report = weekly_report_controller.generate_weekly_report()
+    elif report_type == "monthly":
+        report = monthly_report_controller.generate_monthly_report()
+    else:
+        report_type = "daily"
+        report = daily_report_controller.generate_daily_report()
+
+    return render_template(
+        "reports.html",
+        report=report,
+        report_type=report_type
+    )
 
 @app.route("/logout", methods=["POST"])
 def logout():
