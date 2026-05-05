@@ -13,6 +13,13 @@
             Edit Fund Raising Activity
         {% endif %}
     </h1>
+    <p class="subtitle">
+        {% if form_mode == 'create' %}
+            Set up your campaign details and timeline.
+        {% else %}
+            Refine your campaign information.
+        {% endif %}
+    </p>
 
     <form method="POST">
         <div class="form-group">
