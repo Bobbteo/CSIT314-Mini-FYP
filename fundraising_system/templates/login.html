@@ -11,8 +11,7 @@
 {% block extra_head %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
-<link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ url_for('static', filename='landing.css') }}">
 {% endblock %}
 
@@ -28,27 +27,14 @@
         </form>
     </div>
     {% else %}
-    <nav class="landing-nav__primary" aria-label="Primary">
-        <ul class="landing-nav__links">
-            <li class="landing-nav__dropdown" data-dropdown>
-                <button type="button" class="landing-nav__trigger" id="nav-donate-trigger" aria-expanded="false" aria-controls="nav-donate-panel" aria-haspopup="true">
-                    Donate
-                    <span class="landing-nav__caret" aria-hidden="true"></span>
-                </button>
-                <div class="landing-nav__panel" id="nav-donate-panel" role="region" aria-labelledby="nav-donate-trigger" aria-hidden="true"></div>
-            </li>
-            <li class="landing-nav__dropdown" data-dropdown>
-                <button type="button" class="landing-nav__trigger" id="nav-fundraise-trigger" aria-expanded="false" aria-controls="nav-fundraise-panel" aria-haspopup="true">
-                    Fundraise
-                    <span class="landing-nav__caret" aria-hidden="true"></span>
-                </button>
-                <div class="landing-nav__panel" id="nav-fundraise-panel" role="region" aria-labelledby="nav-fundraise-trigger" aria-hidden="true"></div>
-            </li>
-        </ul>
-    </nav>
-    <button type="button" class="landing-nav__cta" id="open-sign-in" aria-haspopup="dialog" aria-controls="sign-in-modal">
-        Sign In
+    <div class="landing-nav__actions">
+    <button type="button" class="landing-nav__cta landing-nav__cta--ghost" data-open-sign-up aria-haspopup="dialog" aria-controls="auth-modal">
+        Sign up
     </button>
+    <button type="button" class="landing-nav__cta" id="open-sign-in" data-open-sign-in aria-haspopup="dialog" aria-controls="auth-modal">
+        Sign in
+    </button>
+    </div>
     {% endif %}
 </header>
 {% endblock %}
@@ -61,8 +47,8 @@
     </p>
     <div class="landing-hero__actions">
         {% if not session.get('account_id') %}
-        <button type="button" class="landing-btn landing-btn--primary" id="hero-open-sign-in">Start giving</button>
-        <a href="#fundraise" class="landing-btn landing-btn--ghost">Start a fundraiser</a>
+        <button type="button" class="landing-btn landing-btn--primary landing-btn--breath" id="hero-open-sign-in">Start giving</button>
+        <button type="button" class="landing-btn landing-btn--ghost" data-open-sign-up>Start a fundraiser</button>
         {% else %}
         <a href="{{ url_for('dashboard_redirect') }}" class="landing-btn landing-btn--primary">Go to your dashboard</a>
         {% endif %}
@@ -87,120 +73,207 @@
     </div>
 </div>
 
-<section class="landing-section" id="search" data-aos="fade-up" data-aos-duration="800">
-    <div class="landing-section--parallax">
-        <h2 class="landing-section__title">Find a cause that moves you</h2>
-        <p class="landing-section__text">
-            Search and explore campaigns (placeholder for future discovery). Your next act of generosity starts with a single search.
-        </p>
+<div class="landing-mid" aria-label="How it works">
+    <div class="landing-mid__bg" aria-hidden="true">
+        <div class="landing-mid__gradient"></div>
+        <div class="landing-mid__arch landing-mid__arch--1"></div>
+        <div class="landing-mid__arch landing-mid__arch--2"></div>
+        <div class="landing-mid__arch landing-mid__arch--3"></div>
     </div>
-</section>
 
-<section class="landing-section" id="donate" data-aos="fade-up" data-aos-delay="100" data-aos-duration="800">
-    <h2 class="landing-section__title">Donate with confidence</h2>
-    <p class="landing-section__text">
-        Transparent, human-centered giving - designed so supporters can focus on impact, not friction.
-    </p>
-    <div class="landing-stats">
-        <div class="landing-stat" data-aos="zoom-in" data-aos-delay="0">
-            <div class="landing-stat__value">12k+</div>
-            <div class="landing-stat__label">Supporters (demo)</div>
+    <section class="landing-bento" id="search">
+        <div class="landing-bento__grid landing-bento__grid--find">
+            <div class="landing-bento__cell landing-bento__cell--feature">
+                <div class="landing-arch-frame" aria-hidden="true">
+                    <img src="{{ url_for('static', filename='images/hero/fund2.jpg') }}" alt="">
+                </div>
+                <div class="landing-reveal">
+                    <div class="landing-reveal__inner">
+                        <p class="landing-eyebrow">Discover</p>
+                        <h2 class="landing-section__title">Find a cause that moves you</h2>
+                        <p class="landing-section__text">
+                            Search and explore campaigns. Your next act of generosity starts with a single search.
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="landing-stat" data-aos="zoom-in" data-aos-delay="80">
-            <div class="landing-stat__value">$2.4M</div>
-            <div class="landing-stat__label">Raised (demo)</div>
-        </div>
-        <div class="landing-stat" data-aos="zoom-in" data-aos-delay="160">
-            <div class="landing-stat__value">480</div>
-            <div class="landing-stat__label">Campaigns (demo)</div>
-        </div>
-    </div>
-</section>
+    </section>
 
-<section class="landing-section" id="fundraise" data-aos="fade-up" data-aos-duration="800">
-    <h2 class="landing-section__title">Tell your story. Rally your community.</h2>
-    <p class="landing-section__text">
-        Launch a fundraiser in minutes, share updates, and grow support with tools built for clarity and trust.
-    </p>
-</section>
+    <section class="landing-bento landing-bento--spaced" id="donate">
+        <div class="landing-bento__grid landing-bento__grid--stats">
+            <div class="landing-bento__cell landing-bento__cell--copy">
+                <div class="landing-reveal">
+                    <div class="landing-reveal__inner">
+                        <p class="landing-eyebrow">Trust &amp; transparency</p>
+                        <h2 class="landing-section__title">Donate with confidence</h2>
+                        <p class="landing-section__text">
+                            Human-centered giving designed so supporters focus on impact, not friction.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="landing-bento__cell landing-bento__cell--metrics">
+                <article class="landing-stat" data-stat-card>
+                    <div class="landing-stat__value" data-count-end="12000" data-count-format="compact-plus">0</div>
+                    <p class="landing-stat__label">Supporters <span class="landing-stat__demo">demo</span></p>
+                </article>
+                <article class="landing-stat" data-stat-card>
+                    <div class="landing-stat__value" data-count-end="2.4" data-count-prefix="$" data-count-suffix="M" data-count-decimals="1">0</div>
+                    <p class="landing-stat__label">Raised <span class="landing-stat__demo">demo</span></p>
+                </article>
+                <article class="landing-stat landing-stat--wide" data-stat-card>
+                    <div class="landing-stat__value" data-count-end="480">0</div>
+                    <p class="landing-stat__label">Active campaigns <span class="landing-stat__demo">demo</span></p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="landing-bento landing-bento--spaced" id="fundraise">
+        <div class="landing-bento__grid landing-bento__grid--fundraise">
+            <div class="landing-bento__cell landing-bento__cell--story">
+                <div class="landing-reveal">
+                    <div class="landing-reveal__inner">
+                        <p class="landing-eyebrow">For organizers</p>
+                        <h2 class="landing-section__title">Tell your story.<br>Rally your community.</h2>
+                        <p class="landing-section__text">
+                            Launch a fundraiser in minutes, share updates, and grow support with tools built for clarity and trust.
+                        </p>
+                        {% if not session.get('account_id') %}
+                        <div class="landing-bento__cta-row">
+                            <button type="button" class="landing-btn landing-btn--primary landing-btn--breath" id="mid-open-sign-in">Start giving</button>
+                            <button type="button" class="landing-btn landing-btn--ghost" data-open-sign-up>Start a fundraiser</button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="landing-bento__cell landing-bento__cell--visual">
+                <div class="landing-arch-frame landing-arch-frame--tall" aria-hidden="true">
+                    <img src="{{ url_for('static', filename='images/hero/fund4.jpg') }}" alt="">
+                </div>
+                <div class="landing-arch-frame landing-arch-frame--small" aria-hidden="true">
+                    <img src="{{ url_for('static', filename='images/hero/fund5.jpg') }}" alt="">
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
 
 {% if not session.get('account_id') %}
-<div class="landing-modal" id="sign-in-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
-    <div class="landing-modal__backdrop" id="sign-in-backdrop" tabindex="-1"></div>
-    <div class="landing-modal__panel">
-        <button type="button" class="landing-modal__close" id="close-sign-in" aria-label="Close sign in">&times;</button>
-        <h2 class="landing-modal__title" id="modal-title">Welcome back</h2>
-        <p class="landing-modal__subtitle">Sign in to access your dashboard.</p>
+{% set auth_tab = auth_tab|default('signin') %}
+<div class="landing-modal" id="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title" data-auth-tab="{{ auth_tab }}" hidden>
+    <div class="landing-modal__backdrop" id="auth-modal-backdrop" tabindex="-1"></div>
+    <div class="landing-modal__panel landing-modal__panel--auth">
+        <button type="button" class="landing-modal__close" id="close-auth-modal" aria-label="Close">&times;</button>
 
-        <form method="POST" action="{{ url_for('login') }}" class="landing-form">
-            <div class="form-group">
-                <label for="username_or_email">Username or Email</label>
-                <input
-                    type="text"
-                    id="username_or_email"
-                    name="username_or_email"
-                    placeholder="Enter your username or email"
-                    required
-                    autocomplete="username"
-                >
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    placeholder="Enter your password"
-                    required
-                    autocomplete="current-password"
-                >
-            </div>
-            <button type="submit" class="btn-primary">Sign in</button>
-        </form>
+        <div class="landing-auth-tabs" role="tablist" aria-label="Authentication">
+            <button type="button" class="landing-auth-tabs__btn{% if auth_tab != 'signup' %} is-active{% endif %}" role="tab" data-auth-tab="signin" aria-selected="{% if auth_tab != 'signup' %}true{% else %}false{% endif %}">Sign in</button>
+            <button type="button" class="landing-auth-tabs__btn{% if auth_tab == 'signup' %} is-active{% endif %}" role="tab" data-auth-tab="signup" aria-selected="{% if auth_tab == 'signup' %}true{% else %}false{% endif %}">Sign up</button>
+        </div>
 
-        <div class="landing-demo-box">
-            <h3>Admin login</h3>
-            <ul>
-                <li><strong>admin / admin</strong></li>
-            </ul>
+        <div class="landing-auth-panel{% if auth_tab != 'signup' %} is-active{% endif %}" data-auth-panel="signin" role="tabpanel">
+            <h2 class="landing-modal__title" id="auth-modal-title">Welcome back</h2>
+            <p class="landing-modal__subtitle">Sign in to access your dashboard.</p>
+
+            <form method="POST" action="{{ url_for('login') }}" class="landing-form">
+                <div class="form-group">
+                    <label for="username_or_email">Username or Email</label>
+                    <input type="text" id="username_or_email" name="username_or_email" placeholder="Enter your username or email" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="signin_password">Password</label>
+                    <input type="password" id="signin_password" name="password" placeholder="Enter your password" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn-primary">Sign in</button>
+            </form>
+
+            <div class="landing-demo-box">
+                <h3>Demo logins</h3>
+                <ul>
+                    <li><strong>admin / admin</strong></li>
+                    <li><strong>fundraiser / fundraiser</strong></li>
+                    <li><strong>doner / doner</strong></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="landing-auth-panel{% if auth_tab == 'signup' %} is-active{% endif %}" data-auth-panel="signup" role="tabpanel"{% if auth_tab != 'signup' %} hidden{% endif %}>
+            <h2 class="landing-modal__title">Create your account</h2>
+            <p class="landing-modal__subtitle">Join as a donor or fundraiser.</p>
+
+            <form method="POST" action="{{ url_for('signup') }}" class="landing-form">
+                <div class="form-group">
+                    <label for="signup_username">Username</label>
+                    <input type="text" id="signup_username" name="username" value="{{ request.form.get('username', '') }}" placeholder="Choose a username" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="signup_full_name">Full name</label>
+                    <input type="text" id="signup_full_name" name="full_name" value="{{ request.form.get('full_name', '') }}" placeholder="Your full name" required autocomplete="name">
+                </div>
+                <div class="form-group">
+                    <label for="signup_email">Email</label>
+                    <input type="email" id="signup_email" name="email" value="{{ request.form.get('email', '') }}" placeholder="you@example.com" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label for="signup_password">Password</label>
+                    <input type="password" id="signup_password" name="password" placeholder="Create a password" required autocomplete="new-password">
+                </div>
+                <div class="form-group">
+                    <label for="signup_role">Role</label>
+                    <select id="signup_role" name="role" required>
+                        <option value="" disabled {% if not request.form.get('role') %}selected{% endif %}>Select your role</option>
+                        <option value="doner" {% if request.form.get('role') == 'doner' %}selected{% endif %}>Donor — give to campaigns</option>
+                        <option value="fundraiser" {% if request.form.get('role') == 'fundraiser' %}selected{% endif %}>Fundraiser — run campaigns</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary">Create account</button>
+            </form>
         </div>
     </div>
 </div>
 {% endif %}
+
 {% endblock %}
 
+
 {% block extra_scripts %}
-<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+<script src="{{ url_for('static', filename='landing-mid.js') }}"></script>
 <script>
 (function () {
-    AOS.init({ duration: 750, once: true, offset: 60 });
-
-    var parallax = document.querySelector(".landing-section--parallax");
-    if (parallax) {
-        var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        if (!reduce) {
-            window.addEventListener(
-                "scroll",
-                function () {
-                    var y = window.scrollY * 0.04;
-                    parallax.style.setProperty("--parallax-y", y + "px");
-                },
-                { passive: true }
-            );
-        }
-    }
-
-    var modal = document.getElementById("sign-in-modal");
+    var modal = document.getElementById("auth-modal");
     var openBtn = document.getElementById("open-sign-in");
     var heroOpen = document.getElementById("hero-open-sign-in");
-    var closeBtn = document.getElementById("close-sign-in");
-    var backdrop = document.getElementById("sign-in-backdrop");
+    var midOpen = document.getElementById("mid-open-sign-in");
+    var closeBtn = document.getElementById("close-auth-modal");
+    var backdrop = document.getElementById("auth-modal-backdrop");
+    var tabButtons = modal ? modal.querySelectorAll(".landing-auth-tabs__btn[data-auth-tab]") : [];
+    var panels = modal ? modal.querySelectorAll("[data-auth-panel]") : [];
 
-    function openModal() {
+    function setAuthTab(tab) {
         if (!modal) return;
+        tab = tab === "signup" ? "signup" : "signin";
+        modal.setAttribute("data-auth-tab", tab);
+        tabButtons.forEach(function (btn) {
+            var active = btn.getAttribute("data-auth-tab") === tab;
+            btn.classList.toggle("is-active", active);
+            btn.setAttribute("aria-selected", active ? "true" : "false");
+        });
+        panels.forEach(function (panel) {
+            var active = panel.getAttribute("data-auth-panel") === tab;
+            panel.classList.toggle("is-active", active);
+            panel.hidden = !active;
+        });
+    }
+
+    function openModal(tab) {
+        if (!modal) return;
+        setAuthTab(tab || modal.getAttribute("data-auth-tab") || "signin");
         modal.hidden = false;
         document.body.classList.add("modal-open");
-        var first = modal.querySelector("input, button");
+        var activePanel = modal.querySelector(".landing-auth-panel.is-active");
+        var first = activePanel ? activePanel.querySelector("input, select, button[type='submit']") : null;
         if (first) first.focus();
     }
 
@@ -211,70 +284,39 @@
         if (openBtn) openBtn.focus();
     }
 
-    if (openBtn) openBtn.addEventListener("click", openModal);
-    if (heroOpen) heroOpen.addEventListener("click", openModal);
+    tabButtons.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            setAuthTab(btn.getAttribute("data-auth-tab"));
+        });
+    });
+
+    if (openBtn) openBtn.addEventListener("click", function () { openModal("signin"); });
+    if (heroOpen) heroOpen.addEventListener("click", function () { openModal("signin"); });
+    if (midOpen) midOpen.addEventListener("click", function () { openModal("signin"); });
+    document.querySelectorAll("[data-open-sign-in]").forEach(function (btn) {
+        btn.addEventListener("click", function () { openModal("signin"); });
+    });
+    document.querySelectorAll("[data-open-sign-up]").forEach(function (btn) {
+        btn.addEventListener("click", function () { openModal("signup"); });
+    });
     if (closeBtn) closeBtn.addEventListener("click", closeModal);
     if (backdrop) backdrop.addEventListener("click", closeModal);
 
-    var dropdowns = document.querySelectorAll("[data-dropdown]");
-
-    function closeAllDropdowns() {
-        dropdowns.forEach(function (dd) {
-            dd.classList.remove("is-open");
-            var btn = dd.querySelector(".landing-nav__trigger");
-            var panel = dd.querySelector(".landing-nav__panel");
-            if (btn) btn.setAttribute("aria-expanded", "false");
-            if (panel) panel.setAttribute("aria-hidden", "true");
-        });
-    }
-
-    function openDropdown(dd) {
-        closeAllDropdowns();
-        dd.classList.add("is-open");
-        var btn = dd.querySelector(".landing-nav__trigger");
-        var panel = dd.querySelector(".landing-nav__panel");
-        if (btn) btn.setAttribute("aria-expanded", "true");
-        if (panel) panel.setAttribute("aria-hidden", "false");
-    }
-
-    function toggleDropdown(dd) {
-        if (dd.classList.contains("is-open")) {
-            closeAllDropdowns();
-        } else {
-            openDropdown(dd);
-        }
-    }
-
-    dropdowns.forEach(function (dd) {
-        var btn = dd.querySelector(".landing-nav__trigger");
-        if (!btn) return;
-        btn.addEventListener("click", function (e) {
-            e.stopPropagation();
-            toggleDropdown(dd);
-        });
-    });
-
-    document.addEventListener("click", function () {
-        closeAllDropdowns();
-    });
-
-    dropdowns.forEach(function (dd) {
-        dd.addEventListener("click", function (e) {
-            e.stopPropagation();
-        });
-    });
-
     document.addEventListener("keydown", function (e) {
         if (e.key !== "Escape") return;
-        if (modal && !modal.hidden) {
-            closeModal();
-            return;
-        }
-        closeAllDropdowns();
+        if (modal && !modal.hidden) closeModal();
     });
 
-    var flashes = document.querySelectorAll(".landing-flash .flash-danger, .landing-flash .flash-warning");
-    if (flashes.length && modal) openModal();
+    var flashes = document.querySelectorAll(".landing-flash .flash");
+    if (flashes.length && modal) {
+        var isLogout = Array.prototype.some.call(flashes, function (el) {
+            return /logged out/i.test(el.textContent);
+        });
+        if (!isLogout) {
+            openModal(modal.getAttribute("data-auth-tab") || "signin");
+        }
+    }
 })();
 </script>
+
 {% endblock %}

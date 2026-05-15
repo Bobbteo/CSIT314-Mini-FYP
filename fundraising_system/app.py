@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from config import SECRET_KEY
 from datetime import date
 from control.loginC import LoginController
@@ -41,6 +41,8 @@ from control.readActiveCategoryC import ReadActiveCategoryController
 
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
+
+SIGNUP_ALLOWED_ROLES = frozenset({"fundraiser", "doner"})
 
 login_controller = LoginController()
 read_account_controller = ReadAccountController()
@@ -112,6 +114,14 @@ def restricted_block_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def _apply_session(account):
+    session["account_id"] = account.account_id
+    session["username"] = account.username
+    session["full_name"] = account.full_name
+    session["role"] = account.role
+    session["status"] = account.status
+
+
 @app.route("/")
 def home():
     if "account_id" in session:
@@ -121,6 +131,11 @@ def home():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    if "account_id" in session:
+        return redirect(url_for("dashboard_redirect"))
+
+    auth_tab = request.args.get("tab", "signin")
+
     if request.method == "POST":
         username_or_email = request.form.get("username_or_email", "").strip()
         password = request.form.get("password", "").strip()
@@ -128,19 +143,43 @@ def login():
         result = login_controller.login(username_or_email, password)
 
         if result["success"]:
-            account = result["account"]
-            session["account_id"] = account.account_id
-            session["username"] = account.username
-            session["full_name"] = account.full_name
-            session["role"] = account.role
-            session["status"] = account.status
-
+            _apply_session(result["account"])
             flash(result["message"], "success")
             return redirect(url_for("dashboard_redirect"))
 
         flash(result["message"], "danger")
+        auth_tab = "signin"
 
-    return render_template("login.html")
+    return render_template("login.html", auth_tab=auth_tab)
+
+
+@app.route("/signup", methods=["POST"])
+def signup():
+    if "account_id" in session:
+        return redirect(url_for("dashboard_redirect"))
+
+    role = request.form.get("role", "").strip()
+    if role not in SIGNUP_ALLOWED_ROLES:
+        flash("Please select Donor or Fundraiser.", "danger")
+        return render_template("login.html", auth_tab="signup")
+
+    result = create_account_controller.create_account(request.form)
+
+    if not result["success"]:
+        flash(result["message"], "danger")
+        return render_template("login.html", auth_tab="signup")
+
+    username = request.form.get("username", "").strip()
+    password = request.form.get("password", "").strip()
+    login_result = login_controller.login(username, password)
+
+    if login_result["success"]:
+        _apply_session(login_result["account"])
+        flash("Welcome! Your account has been created.", "success")
+        return redirect(url_for("dashboard_redirect"))
+
+    flash("Account created. Please sign in.", "success")
+    return render_template("login.html", auth_tab="signin")
 
 '''
 ---------- Login Functions ----------
@@ -288,6 +327,26 @@ def fundraiser_dashboard():
         keyword=keyword
     )
 
+def _is_embed_form_request():
+    return request.args.get("embed") == "1" or request.form.get("embed") == "1"
+
+
+def _emp_form_ajax_response(result, redirect_endpoint="fundraiser_dashboard"):
+    if not _is_embed_form_request():
+        return None
+    if request.headers.get("X-Emp-Form") == "1" or request.headers.get("Accept", "").find("json") >= 0:
+        if result["success"]:
+            flash(result["message"], "success")
+        else:
+            flash(result["message"], "danger")
+        return jsonify(
+            success=result["success"],
+            message=result["message"],
+            redirect=url_for(redirect_endpoint) if result["success"] else None,
+        )
+    return None
+
+
 @app.route("/fundraiser/fra/create", methods=["GET", "POST"])
 @login_required
 @role_required("fundraiser")
@@ -295,6 +354,10 @@ def fundraiser_dashboard():
 def create_fra():
     if request.method == "POST":
         result = create_fra_controller.create_fra(session.get("account_id"), request.form)
+
+        ajax = _emp_form_ajax_response(result)
+        if ajax:
+            return ajax
 
         flash(result["message"], "success" if result["success"] else "danger")
 
@@ -332,6 +395,10 @@ def edit_fra(fra_id):
             session.get("account_id"),
             request.form
         )
+
+        ajax = _emp_form_ajax_response(result)
+        if ajax:
+            return ajax
 
         flash(result["message"], "success" if result["success"] else "danger")
 
@@ -429,7 +496,8 @@ def doner_favourites():
 
     return render_template(
         "doner_favourites.html",
-        favourites=favourites
+        favourites=favourites,
+        user_name=session.get("full_name"),
     )
 
 @app.route("/doner/donation-history")
@@ -450,7 +518,8 @@ def doner_donation_history():
     return render_template(
         "doner_donation_history.html",
         donation_history=donation_history,
-        donation_keyword=donation_keyword
+        donation_keyword=donation_keyword,
+        user_name=session.get("full_name"),
     )
 
 @app.route("/doner/fra/<int:fra_id>")

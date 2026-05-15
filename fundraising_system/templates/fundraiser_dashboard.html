@@ -1,96 +1,104 @@
 {% extends "base.html" %}
+{% from "dashboard_macros.html" import emp_head, emp_nav, emp_search, emp_thumb, emp_status_badge, emp_progress, emp_portal_form, emp_portal_embed %}
 
 {% block title %}Fundraiser Dashboard{% endblock %}
 
+{% block extra_head %}{{ emp_head() }}{% endblock %}
+{% block body_class %}empower-dashboard-page{% endblock %}
+{% block main_class %}emp-main{% endblock %}
+
+{% block site_nav %}
+{{ emp_nav() }}
+{% endblock %}
+
 {% block content %}
-<div class="card">
-    <div class="page-header">
+<section class="emp-dash" data-emp-dashboard>
+    <header class="emp-dash__header">
         <div>
-            <h1>Fundraiser Dashboard</h1>
-            <p>Welcome, {{ user_name }}.</p>
-            <p>Manage your fund raising activities here.</p>
+            <h1 class="emp-dash__title">Your campaigns</h1>
+            <p class="emp-dash__subtitle">
+                Welcome, <strong>{{ user_name }}</strong>. Manage fund raising activities in a calm, focused workspace.
+            </p>
         </div>
-
-        <div class="dashboard-actions">
-            <a href="{{ url_for('create_fra') }}" class="action-btn">+ Create FRA</a>
-            <a href="{{ url_for('fra_statistics') }}" class="action-btn">FRA Statistics</a>
-            <a href="{{ url_for('completed_fras') }}" class="action-btn">Completed / Closed FRA</a>
+        <div class="emp-dash__actions">
+            <a
+                href="{{ url_for('create_fra') }}"
+                class="emp-btn emp-btn--primary emp-btn--magnetic"
+                data-portal-open="emp-portal-create"
+                data-portal-title="Create FRA"
+            >+ Create FRA</a>
+            <a
+                href="{{ url_for('fra_statistics') }}"
+                class="emp-btn emp-btn--ghost"
+                data-portal-open="emp-portal-stats"
+                data-portal-title="Statistics"
+            >Statistics</a>
+            <div class="emp-more">
+                <button type="button" class="emp-btn emp-btn--ghost" data-more-toggle aria-label="More">⋯</button>
+                <div class="emp-more__menu">
+                    <a href="{{ url_for('completed_fras') }}" data-portal-open="emp-portal-completed" data-portal-title="Completed / Closed">Completed / Closed</a>
+                    <a href="{{ url_for('home') }}">Home</a>
+                </div>
+            </div>
         </div>
-    </div>
+    </header>
 
-    <form method="GET" action="{{ url_for('fundraiser_dashboard') }}" class="search-form">
-        <input
-            type="text"
-            name="keyword"
-            value="{{ keyword }}"
-            placeholder="Search by title, category, or status"
-            class="search-input"
-        >
-        <button type="submit" class="search-btn">Search</button>
-        <a href="{{ url_for('fundraiser_dashboard') }}" class="clear-btn">Clear</a>
-    </form>
-    <div class="table-container">
-        <div class="table-scroll-top"><div></div></div>
-        
-        <div class="table-wrap">
-            <table class="account-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Title</th>
-                        <th>Category</th>
-                        <th>Target</th>
-                        <th>Current</th>
-                        <th>Status</th>
-                        <th>Start</th>
-                        <th>End</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
+    {{ emp_search("emp-search", keyword, "Search your campaigns…") }}
 
-                <tbody>
-                    {% if fra_list %}
-                        {% for fra in fra_list %}
-                        <tr>
-                            <td>{{ fra.fra_id }}</td>
-                            <td>{{ fra.title }}</td>
-                            <td>{{ fra.category }}</td>
-                            <td>${{ "%.2f"|format(fra.target_amount) }}</td>
-                            <td>${{ "%.2f"|format(fra.current_amount) }}</td>
-                            <td>
-                                <span class="status-badge status-{{ fra.status }}">
-                                    {{ fra.status }}
-                                </span>
-                            </td>
-                            <td>{{ fra.start_date }}</td>
-                            <td>{{ fra.end_date }}</td>
-                            <td>
-                                <div class="action-cell">
-                                    {% if fra.status == 'cancelled' %}
-                                        <form action="{{ url_for('reactivate_fra', fra_id=fra.fra_id) }}" method="POST" style="display:inline;">
-                                            <button type="submit" class="table-btn edit-btn">Reactivate</button>
-                                        </form>
-                                    {% else %}
-                                        <a href="{{ url_for('edit_fra', fra_id=fra.fra_id) }}" class="table-btn edit-btn">
-                                            Edit
-                                        </a>
-
-                                        <form action="{{ url_for('cancel_fra', fra_id=fra.fra_id) }}" method="POST" style="display:inline;">
-                                            <button type="submit" class="table-btn suspend-btn">Cancel</button>
-                                        </form>
-                                    {% endif %}
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
+    <div class="emp-list">
+        {% if fra_list %}
+            {% for fra in fra_list %}
+            <article
+                class="emp-card emp-card--fundraiser"
+                data-emp-card
+                data-search="{{ fra.fra_id }} {{ fra.title|lower }} {{ fra.category|lower }} {{ fra.status|lower }}"
+                style="--stagger: {{ loop.index }}"
+            >
+                {{ emp_thumb(fra, loop.index) }}
+                <div class="emp-card__main">
+                    <p class="emp-card__id">#{{ fra.fra_id }}</p>
+                    <h2 class="emp-card__title">{{ fra.title }}</h2>
+                    <p class="emp-card__meta">{{ fra.category }} · {{ fra.start_date }} – {{ fra.end_date }}</p>
+                </div>
+                <div class="emp-card__aside">
+                    {{ emp_status_badge(fra.status) }}
+                </div>
+                {{ emp_progress(fra) }}
+                <div class="emp-card__actions">
+                    {% if fra.status == 'cancelled' %}
+                        <form action="{{ url_for('reactivate_fra', fra_id=fra.fra_id) }}" method="POST" style="display:inline;">
+                            <button type="submit" class="emp-btn emp-btn--ghost emp-btn--sm">Reactivate</button>
+                        </form>
                     {% else %}
-                        <tr>
-                            <td colspan="9" class="empty-row">No FRA found.</td>
-                        </tr>
+                        <a href="{{ url_for('edit_fra', fra_id=fra.fra_id) }}" class="emp-btn emp-btn--ghost emp-btn--sm" data-portal-open="emp-portal-create" data-portal-title="Edit campaign">Edit</a>
+                        <form action="{{ url_for('cancel_fra', fra_id=fra.fra_id) }}" method="POST" style="display:inline;">
+                            <button type="submit" class="emp-btn emp-btn--ghost emp-btn--sm">Cancel</button>
+                        </form>
                     {% endif %}
-                </tbody>
-            </table>
-        </div>
+                </div>
+            </article>
+            {% endfor %}
+        {% endif %}
     </div>
-</div>
+
+    {% if not fra_list %}
+    <div class="emp-empty">
+        <svg class="emp-empty__illus" viewBox="0 0 200 160" fill="none" aria-hidden="true">
+            <rect x="24" y="48" width="152" height="88" rx="20" fill="rgba(0,77,64,0.06)" stroke="rgba(0,77,64,0.12)"/>
+            <path d="M72 32c12-8 28-8 40 0" stroke="#00897b" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+        </svg>
+        <h2 class="emp-empty__title">No campaigns yet</h2>
+        <p class="emp-empty__text">Create your first fund raising activity to get started.</p>
+        <a href="{{ url_for('create_fra') }}" class="emp-btn emp-btn--primary emp-btn--magnetic" data-portal-open="emp-portal-create" data-portal-title="Create FRA" style="margin-top:16px;">+ Create FRA</a>
+    </div>
+    {% endif %}
+</section>
+
+{{ emp_portal_form("emp-portal-create") }}
+{{ emp_portal_embed("emp-portal-stats", true) }}
+{{ emp_portal_embed("emp-portal-completed", true) }}
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='empower-dashboard.js') }}"></script>
 {% endblock %}

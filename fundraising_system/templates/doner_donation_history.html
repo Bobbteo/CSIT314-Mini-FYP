@@ -1,65 +1,102 @@
 {% extends "base.html" %}
+{% from "dashboard_macros.html" import emp_head, emp_nav %}
+
+{% set is_embed = request.args.get('embed') == '1' %}
+{% set user_name = session.get('full_name') or session.get('username') %}
 
 {% block title %}Donation History{% endblock %}
 
+{% block body_class %}{% if is_embed %}emp-sub-embed{% else %}empower-dashboard-page{% endif %}{% endblock %}
+{% block main_class %}{% if not is_embed %}emp-main{% endif %}{% endblock %}
+
+{% block site_nav %}
+{% if not is_embed %}
+{{ emp_nav() }}
+{% endif %}
+{% endblock %}
+
+{% block extra_head %}
+{{ emp_head() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='empower-doner-sub.css') }}">
+{% endblock %}
+
 {% block content %}
-<div class="card">
-    <div class="page-header">
+<section class="emp-sub" data-emp-sub>
+    <header class="emp-sub__header">
         <div>
-            <h1>Donation History</h1>
-            <p>Search and view your previous donations.</p>
+            <h1 class="emp-sub__title">Donation history</h1>
+            <p class="emp-sub__subtitle">Search and review your previous contributions.</p>
         </div>
+        {% if is_embed %}
+        <button type="button" class="emp-sub__close" data-emp-sub-close aria-label="Close">×</button>
+        {% else %}
+        <a href="{{ url_for('doner_dashboard') }}" class="emp-btn emp-btn--ghost">Back to dashboard</a>
+        {% endif %}
+    </header>
 
-        <div>
-            <a href="{{ url_for('doner_dashboard') }}" class="clear-btn">Back to Dashboard</a>
-        </div>
-    </div>
-
-    <form method="GET" action="{{ url_for('doner_donation_history') }}" class="search-form">
+    <form method="GET" action="{{ url_for('doner_donation_history') }}{% if is_embed %}?embed=1{% endif %}" class="emp-sub-search">
+        <svg class="emp-sub-search__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/>
+        </svg>
         <input
-            type="text"
+            type="search"
             name="donation_keyword"
+            class="emp-sub-search__input"
             value="{{ donation_keyword }}"
-            placeholder="Search by FRA, category, amount, or date"
-            class="search-input"
+            placeholder="Search by campaign, category, amount, or date…"
+            autocomplete="off"
         >
-        <button type="submit" class="search-btn">Search</button>
-        <a href="{{ url_for('doner_donation_history') }}" class="clear-btn">Clear</a>
+        <button type="submit" class="emp-btn emp-btn--primary emp-btn--sm">Search</button>
+        {% if donation_keyword %}
+        <a href="{{ url_for('doner_donation_history') }}{% if is_embed %}?embed=1{% endif %}" class="emp-btn emp-btn--ghost emp-btn--sm">Clear</a>
+        {% endif %}
     </form>
-    <div class="table-container">
-        <div class="table-scroll-top"><div></div></div>
-        
-        <div class="table-wrap">
-            <table class="account-table">
-                <thead>
-                    <tr>
-                        <th>Donation ID</th>
-                        <th>FRA</th>
-                        <th>Category</th>
-                        <th>Amount</th>
-                        <th>Donated At</th>
-                    </tr>
-                </thead>
 
-                <tbody>
-                    {% if donation_history %}
-                        {% for donation in donation_history %}
-                        <tr>
-                            <td>{{ donation.donation_id }}</td>
-                            <td>{{ donation.title }}</td>
-                            <td>{{ donation.category }}</td>
-                            <td>${{ "%.2f"|format(donation.amount) }}</td>
-                            <td>{{ donation.donated_at }}</td>
-                        </tr>
-                        {% endfor %}
-                    {% else %}
-                        <tr>
-                            <td colspan="5" class="empty-row">No donation history found.</td>
-                        </tr>
-                    {% endif %}
-                </tbody>
-            </table>
-        </div>
+    {% if donation_history %}
+    <div class="emp-sub-list">
+        {% for donation in donation_history %}
+        <article class="emp-sub-row emp-sub-row--donation" style="--stagger: {{ loop.index }}">
+            <div class="emp-sub-donation__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+                    <path d="M12 2v20M17 7H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6"/>
+                </svg>
+            </div>
+            <div class="emp-sub-row__main">
+                <p class="emp-sub-row__id">Donation #{{ donation.donation_id }}</p>
+                <h2 class="emp-sub-row__name">{{ donation.title }}</h2>
+                <p class="emp-sub-row__meta">{{ donation.category }} · {{ donation.donated_at }}</p>
+            </div>
+            <div class="emp-sub-row__aside">
+                <span class="emp-sub-amount">${{ "%.2f"|format(donation.amount) }}</span>
+            </div>
+        </article>
+        {% endfor %}
     </div>
-</div>
+    {% else %}
+    <div class="emp-empty emp-sub-empty">
+        <svg class="emp-empty__illus" viewBox="0 0 200 160" fill="none" aria-hidden="true">
+            <rect x="36" y="44" width="128" height="72" rx="16" fill="rgba(0,77,64,0.06)" stroke="rgba(0,77,64,0.12)"/>
+            <path d="M56 88h48M56 100h32" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="148" cy="68" r="18" fill="rgba(0,137,123,0.12)" stroke="#00695c"/>
+        </svg>
+        <h2 class="emp-empty__title">{% if donation_keyword %}No matches found{% else %}No donations yet{% endif %}</h2>
+        <p class="emp-empty__text">
+            {% if donation_keyword %}
+            Try a different search term or clear filters to see all donations.
+            {% else %}
+            When you support a campaign, your contributions will appear here.
+            {% endif %}
+        </p>
+        {% if donation_keyword %}
+        <a href="{{ url_for('doner_donation_history') }}{% if is_embed %}?embed=1{% endif %}" class="emp-btn emp-btn--ghost">Clear search</a>
+        {% elif not is_embed %}
+        <a href="{{ url_for('doner_dashboard') }}" class="emp-btn emp-btn--primary">Discover campaigns</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='empower-doner-sub.js') }}"></script>
 {% endblock %}

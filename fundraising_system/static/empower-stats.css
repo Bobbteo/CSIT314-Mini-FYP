@@ -1,0 +1,200 @@
+/* FRA Statistics — embed modal */
+
+body.emp-stats-embed {
+    background: transparent;
+    min-height: auto;
+}
+
+body.emp-stats-embed .container {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+}
+
+.emp-stats {
+    font-family: "Inter", system-ui, sans-serif;
+    color: #3d4f4a;
+    padding: clamp(16px, 3vw, 24px);
+    animation: emp-stats-in 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes emp-stats-in {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.emp-stats__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.emp-stats__title {
+    font-family: "Montserrat", "Inter", sans-serif;
+    font-weight: 800;
+    font-size: clamp(1.2rem, 2.8vw, 1.45rem);
+    letter-spacing: -0.03em;
+    color: #004d40;
+    margin-bottom: 4px;
+}
+
+.emp-stats__subtitle {
+    font-size: 0.875rem;
+    color: #6b7c76;
+    line-height: 1.5;
+}
+
+.emp-stats__close {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 10px;
+    background: rgba(0, 77, 64, 0.08);
+    color: #004d40;
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: transform 0.25s ease, background 0.25s ease;
+}
+
+.emp-stats__close:hover {
+    background: rgba(0, 77, 64, 0.14);
+    transform: scale(1.05);
+}
+
+.emp-stats-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.emp-stats-row {
+    display: grid;
+    grid-template-columns: 56px 1fr auto;
+    gap: 14px 18px;
+    align-items: center;
+    padding: 16px 18px;
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(0, 77, 64, 0.1);
+    border-radius: 20px;
+    box-shadow: 0 4px 16px rgba(0, 77, 64, 0.04);
+    animation: emp-stats-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    animation-delay: calc(0.04s + var(--stagger, 0) * 0.04s);
+}
+
+.emp-stats-row .emp-card__thumb {
+    grid-row: 1 / span 2;
+    width: 56px;
+    height: 68px;
+}
+
+.emp-stats-row__id {
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #6b7c76;
+    margin-bottom: 2px;
+}
+
+.emp-stats-row__name {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 700;
+    font-size: 0.9375rem;
+    color: #004d40;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    margin-bottom: 2px;
+}
+
+.emp-stats-row__meta {
+    font-size: 0.75rem;
+    color: #6b7c76;
+}
+
+.emp-stats-row__metrics {
+    display: flex;
+    gap: 16px;
+    grid-column: 2;
+    grid-row: 2;
+}
+
+.emp-stats-metric {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.emp-stats-metric__value {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: #3d4f4a;
+    font-variant-numeric: tabular-nums;
+}
+
+.emp-stats-metric__label {
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6b7c76;
+}
+
+.emp-stats-row__aside {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    grid-row: 1 / span 2;
+    grid-column: 3;
+}
+
+.emp-stats-row__bar {
+    width: 72px;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(0, 77, 64, 0.08);
+    overflow: hidden;
+}
+
+.emp-stats-row__bar-fill {
+    height: 100%;
+    width: var(--pct, 0%);
+    border-radius: inherit;
+    background: linear-gradient(90deg, #00695c, #00897b);
+}
+
+.emp-stats-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6b7c76;
+    font-size: 0.9375rem;
+}
+
+@media (max-width: 560px) {
+    .emp-stats-row {
+        grid-template-columns: 48px 1fr;
+    }
+
+    .emp-stats-row__aside {
+        grid-column: 2;
+        grid-row: 1;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    .emp-stats-row__metrics {
+        grid-column: 1 / -1;
+    }
+}

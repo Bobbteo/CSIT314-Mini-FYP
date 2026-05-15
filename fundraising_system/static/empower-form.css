@@ -1,0 +1,357 @@
+/* Create / Edit FRA — embed modal form */
+
+body.emp-form-embed {
+    background: transparent;
+    min-height: auto;
+}
+
+body.emp-form-embed .container {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+}
+
+body.emp-form-embed .flash-stack {
+    margin: 0 0 12px;
+}
+
+body.emp-form-embed .flash {
+    border-radius: 14px;
+    font-size: 0.8125rem;
+}
+
+.emp-form {
+    --ef-forest: #004d40;
+    --ef-forest-mid: #00695c;
+    --ef-mint: #f0fdf4;
+    --ef-charcoal: #3d4f4a;
+    --ef-muted: #6b7c76;
+    --ef-border: rgba(0, 77, 64, 0.12);
+    --ef-radius: 24px;
+    --ef-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    font-family: "Inter", system-ui, sans-serif;
+    color: var(--ef-charcoal);
+    padding: clamp(20px, 4vw, 28px);
+    animation: emp-form-in 0.55s var(--ef-spring) both;
+}
+
+@keyframes emp-form-in {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.emp-form__progress-track {
+    height: 3px;
+    background: rgba(0, 77, 64, 0.08);
+    border-radius: 999px;
+    margin-bottom: 24px;
+    overflow: hidden;
+}
+
+.emp-form__progress-fill {
+    height: 100%;
+    width: 50%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--ef-forest), var(--ef-forest-mid));
+    transition: width 0.45s var(--ef-spring);
+}
+
+.emp-form[data-step="2"] .emp-form__progress-fill {
+    width: 100%;
+}
+
+.emp-form__header {
+    margin-bottom: clamp(20px, 3vw, 28px);
+}
+
+.emp-form__title {
+    font-family: "Montserrat", "Inter", sans-serif;
+    font-weight: 800;
+    font-size: clamp(1.35rem, 3vw, 1.6rem);
+    letter-spacing: -0.03em;
+    color: var(--ef-forest);
+    line-height: 1.15;
+    margin-bottom: 6px;
+}
+
+.emp-form__subtitle {
+    font-size: 0.9375rem;
+    color: var(--ef-muted);
+    line-height: 1.5;
+}
+
+.emp-form__steps {
+    position: relative;
+    overflow: hidden;
+}
+
+.emp-form__panel {
+    display: none;
+    flex-direction: column;
+    gap: 18px;
+    animation: emp-form-step-in 0.4s var(--ef-spring) both;
+}
+
+.emp-form__panel.is-active {
+    display: flex;
+}
+
+.emp-form__panel.is-exiting {
+    animation: emp-form-step-out 0.32s ease both;
+}
+
+@keyframes emp-form-step-in {
+    from {
+        opacity: 0;
+        transform: translateX(24px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes emp-form-step-out {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-24px);
+    }
+}
+
+.emp-field {
+    position: relative;
+}
+
+.emp-field input,
+.emp-field textarea,
+.emp-field select {
+    width: 100%;
+    padding: 16px 14px 8px;
+    font-family: inherit;
+    font-size: 0.9375rem;
+    color: var(--ef-charcoal);
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid var(--ef-border);
+    border-radius: 16px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.emp-field textarea {
+    min-height: 120px;
+    resize: vertical;
+    padding-top: 22px;
+}
+
+.emp-field select {
+    padding: 22px 14px 10px;
+    cursor: pointer;
+}
+
+.emp-field--stacked,
+.emp-field--date {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.emp-field--stacked label,
+.emp-field--date label {
+    position: static;
+    left: auto;
+    top: auto;
+    transform: none;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ef-muted);
+    pointer-events: auto;
+}
+
+.emp-field--stacked input,
+.emp-field--date input[type="date"] {
+    padding: 12px 14px;
+    color-scheme: light;
+}
+
+.emp-field:not(.emp-field--stacked):not(.emp-field--date) label {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--ef-muted);
+    pointer-events: none;
+    transition: transform 0.25s var(--ef-spring), font-size 0.25s ease, color 0.25s ease, top 0.25s ease;
+}
+
+.emp-field--area label {
+    top: 18px;
+    transform: none;
+}
+
+.emp-field input:focus,
+.emp-field textarea:focus,
+.emp-field select:focus {
+    outline: none;
+    border-color: rgba(0, 77, 64, 0.45);
+    box-shadow: 0 0 0 4px rgba(0, 105, 92, 0.12);
+}
+
+.emp-field:not(.emp-field--stacked):not(.emp-field--date) input:focus + label,
+.emp-field:not(.emp-field--stacked):not(.emp-field--date) textarea:focus + label,
+.emp-field:not(.emp-field--stacked):not(.emp-field--date) select:focus + label,
+.emp-field:not(.emp-field--stacked):not(.emp-field--date).is-filled label {
+    top: 8px;
+    transform: none;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--ef-forest-mid);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.emp-field--area.is-filled label,
+.emp-field--area input:focus + label,
+.emp-field--area textarea:focus + label {
+    top: 10px;
+}
+
+.emp-form__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.emp-form__actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+    padding-top: 8px;
+}
+
+.emp-form__actions-end {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+    min-height: 44px;
+}
+
+.emp-form-btn.is-hidden {
+    display: none !important;
+}
+
+.emp-form-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 108px;
+    padding: 12px 22px;
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease, background 0.35s ease;
+}
+
+.emp-form-btn:active {
+    transform: scale(0.98);
+}
+
+.emp-form-btn--primary {
+    background: linear-gradient(145deg, var(--ef-forest), var(--ef-forest-mid));
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(0, 77, 64, 0.35);
+    position: relative;
+    overflow: hidden;
+}
+
+.emp-form-btn--primary:hover {
+    box-shadow: 0 8px 28px rgba(0, 77, 64, 0.42);
+}
+
+.emp-form-btn--ghost {
+    background: var(--ef-mint);
+    color: var(--ef-forest);
+    border: 1px solid var(--ef-border);
+}
+
+.emp-form-btn--magnetic {
+    will-change: transform;
+}
+
+.emp-form-btn__label {
+    transition: opacity 0.2s ease;
+}
+
+.emp-form-btn__spinner {
+    display: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: emp-form-spin 0.7s linear infinite;
+}
+
+.emp-form-btn__check {
+    display: none;
+    width: 18px;
+    height: 18px;
+}
+
+.emp-form-btn.is-loading .emp-form-btn__label,
+.emp-form-btn.is-success .emp-form-btn__label {
+    opacity: 0;
+    position: absolute;
+}
+
+.emp-form-btn.is-loading .emp-form-btn__spinner {
+    display: block;
+}
+
+.emp-form-btn.is-success .emp-form-btn__check {
+    display: block;
+}
+
+.emp-form-btn.is-success {
+    background: #2e7d32;
+}
+
+@keyframes emp-form-spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 520px) {
+    .emp-form__row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .emp-form,
+    .emp-form__panel {
+        animation: none;
+    }
+}

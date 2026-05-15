@@ -1,0 +1,109 @@
+{% macro emp_head() %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='empower-dashboard.css') }}">
+{% endmacro %}
+
+{% macro emp_nav(primary_label=none, primary_href='', primary_portal=none) %}
+<header class="emp-nav">
+    <a href="{{ url_for('home') }}" class="emp-nav__brand">Fundraising System</a>
+    <div class="emp-nav__end">
+        <span class="emp-nav__user">{{ user_name }}</span>
+        <span class="emp-nav__role">{% if session.get('role') == 'doner' %}Donor{% else %}{{ session.get('role')|replace('_', ' ')|title }}{% endif %}</span>
+        {% if primary_label %}
+        {% if primary_portal %}
+        <a
+            href="{{ primary_href }}"
+            class="emp-btn emp-btn--primary emp-btn--magnetic"
+            data-portal-open="{{ primary_portal }}"
+        >{{ primary_label }}</a>
+        {% else %}
+        <a href="{{ primary_href }}" class="emp-btn emp-btn--primary emp-btn--magnetic">{{ primary_label }}</a>
+        {% endif %}
+        {% endif %}
+        <form action="{{ url_for('logout') }}" method="POST" class="emp-nav__logout-form">
+            <button type="submit" class="emp-btn emp-btn--ghost">Logout</button>
+        </form>
+    </div>
+</header>
+{% endmacro %}
+
+{% macro emp_search(input_id, value, placeholder) %}
+<div class="emp-search" id="{{ input_id }}-wrap">
+    <svg class="emp-search__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/>
+    </svg>
+    <input
+        type="search"
+        id="{{ input_id }}"
+        class="emp-search__input"
+        value="{{ value }}"
+        placeholder="{{ placeholder }}"
+        autocomplete="off"
+        aria-label="Search campaigns"
+    >
+    <button type="button" class="emp-search__clear" data-search-clear aria-label="Clear search" hidden>×</button>
+</div>
+{% endmacro %}
+
+{% macro emp_thumb(fra, index) %}
+{% set heroes = ['fund1.jpg', 'fund2.jpg', 'fund3.jpg', 'fund4.jpg', 'fund5.jpg'] %}
+{% set img = heroes[(fra.fra_id + index) % heroes|length] %}
+<div class="emp-card__thumb" aria-hidden="true">
+    <img src="{{ url_for('static', filename='images/hero/' ~ img) }}" alt="">
+</div>
+{% endmacro %}
+
+{% macro emp_status_badge(status) %}
+<span class="emp-pill emp-pill--{{ status }}">
+    <span class="emp-pill__dot" aria-hidden="true"></span>
+    {{ status.replace('_', ' ') }}
+</span>
+{% endmacro %}
+
+{% macro emp_progress(fra) %}
+{% set pct = (fra.current_amount / fra.target_amount * 100) if fra.target_amount else 0 %}
+<div class="emp-card__progress">
+    <div class="emp-card__amounts">
+        <span class="emp-card__raised">${{ "%.2f"|format(fra.current_amount) }}</span>
+        <span class="emp-card__of">of ${{ "%.2f"|format(fra.target_amount) }}</span>
+    </div>
+    <div class="emp-card__bar" data-progress-bar>
+        <div class="emp-card__bar-fill" data-progress-fill style="--target-pct: {{ [pct, 100]|min }}%"></div>
+    </div>
+</div>
+{% endmacro %}
+
+{% macro emp_portal(id, title) %}
+<aside id="{{ id }}" class="emp-portal" aria-hidden="true" role="dialog" aria-label="{{ title }}">
+    <div class="emp-portal__backdrop" data-portal-close></div>
+    <div class="emp-portal__dialog">
+        <header class="emp-portal__head">
+            <h2 class="emp-portal__title" data-portal-title>{{ title }}</h2>
+            <button type="button" class="emp-portal__close" data-portal-close aria-label="Close">×</button>
+        </header>
+        <iframe class="emp-portal__frame" title="{{ title }}"></iframe>
+    </div>
+</aside>
+{% endmacro %}
+
+{% macro emp_portal_form(id, wide=false) %}
+<aside id="{{ id }}" class="emp-portal emp-portal--form{% if wide %} emp-portal--wide{% endif %}" aria-hidden="true" role="dialog" aria-label="Modal">
+    <div class="emp-portal__backdrop" data-portal-close></div>
+    <div class="emp-portal__dialog emp-portal__dialog--form">
+        <button type="button" class="emp-portal__close-fab" data-portal-close aria-label="Close">×</button>
+        <iframe class="emp-portal__frame" title="Campaign form"></iframe>
+    </div>
+</aside>
+{% endmacro %}
+
+{% macro emp_portal_embed(id, wide=false) %}
+<aside id="{{ id }}" class="emp-portal emp-portal--embed{% if wide %} emp-portal--wide{% endif %}" aria-hidden="true" role="dialog" aria-label="Modal">
+    <div class="emp-portal__backdrop" data-portal-close></div>
+    <div class="emp-portal__dialog emp-portal__dialog--form">
+        <button type="button" class="emp-portal__close-fab" data-portal-close aria-label="Close">×</button>
+        <iframe class="emp-portal__frame" title="Content"></iframe>
+    </div>
+</aside>
+{% endmacro %}

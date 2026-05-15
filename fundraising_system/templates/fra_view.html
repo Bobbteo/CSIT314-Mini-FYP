@@ -1,57 +1,111 @@
 {% extends "base.html" %}
+{% from "dashboard_macros.html" import emp_status_badge %}
 
-{% block title %}View FRA{% endblock %}
+{% set is_embed = request.args.get('embed') == '1' %}
+{% set pct = (fra.current_amount / fra.target_amount * 100) if fra.target_amount else 0 %}
+{% set heroes = ['fund1.jpg', 'fund2.jpg', 'fund3.jpg', 'fund4.jpg', 'fund5.jpg'] %}
+{% set hero_img = heroes[fra.fra_id % heroes|length] %}
+
+{% block title %}{{ fra.title }}{% endblock %}
+
+{% block body_class %}{% if is_embed %}emp-view-embed{% endif %}{% endblock %}
+
+{% block site_nav %}
+{% if not is_embed %}
+{{ super() }}
+{% endif %}
+{% endblock %}
+
+{% block extra_head %}
+{% if is_embed %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='empower-dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='empower-view.css') }}">
+{% endif %}
+{% endblock %}
 
 {% block content %}
-<div class="card form-card">
-    <h1>{{ fra.title }}</h1>
-    <p class="subtitle">Campaign details and donation actions.</p>
+<article class="emp-view" data-emp-view>
+    <header class="emp-view__hero">
+        <div class="emp-view__thumb">
+            <img src="{{ url_for('static', filename='images/hero/' ~ hero_img) }}" alt="">
+        </div>
+        <div>
+            <p class="emp-view__eyebrow">Campaign #{{ fra.fra_id }}</p>
+            <h1 class="emp-view__title">{{ fra.title }}</h1>
+            <div class="emp-view__meta">
+                <span class="emp-view__category">{{ fra.category }}</span>
+                {{ emp_status_badge(fra.status) }}
+            </div>
+        </div>
+    </header>
 
-    <div class="detail-list">
-        <div class="detail-item">
-            <div class="detail-label">Category</div>
-            <div class="detail-value">{{ fra.category }}</div>
+    <section class="emp-view__progress" aria-label="Funding progress">
+        <div class="emp-view__amounts">
+            <p class="emp-view__raised">
+                ${{ "%.2f"|format(fra.current_amount) }}
+                <span>raised</span>
+            </p>
+            <p class="emp-view__target">of ${{ "%.2f"|format(fra.target_amount) }}</p>
         </div>
-        <div class="detail-item">
-            <div class="detail-label">Description</div>
-            <div class="detail-value">{{ fra.description }}</div>
+        <div class="emp-view__bar">
+            <div
+                class="emp-view__bar-fill"
+                style="--pct: {{ [pct, 100]|min }}%; width: 0;"
+                data-pct="{{ [pct, 100]|min }}%"
+            ></div>
         </div>
-        <div class="detail-item">
-            <div class="detail-label">Target Amount</div>
-            <div class="detail-value">${{ "%.2f"|format(fra.target_amount) }}</div>
+    </section>
+
+    <div class="emp-view__stats">
+        <div class="emp-view__stat">
+            <p class="emp-view__stat-label">Start</p>
+            <p class="emp-view__stat-value">{{ fra.start_date }}</p>
         </div>
-        <div class="detail-item">
-            <div class="detail-label">Current Amount</div>
-            <div class="detail-value">${{ "%.2f"|format(fra.current_amount) }}</div>
+        <div class="emp-view__stat">
+            <p class="emp-view__stat-label">End</p>
+            <p class="emp-view__stat-value">{{ fra.end_date }}</p>
         </div>
-        <div class="detail-item">
-            <div class="detail-label">Status</div>
-            <div class="detail-value">{{ fra.status.replace('_', ' ').title() }}</div>
-        </div>
-        <div class="detail-item">
-            <div class="detail-label">Start Date</div>
-            <div class="detail-value">{{ fra.start_date }}</div>
-        </div>
-        <div class="detail-item">
-            <div class="detail-label">End Date</div>
-            <div class="detail-value">{{ fra.end_date }}</div>
+        <div class="emp-view__stat">
+            <p class="emp-view__stat-label">Progress</p>
+            <p class="emp-view__stat-value">{{ "%.0f"|format([pct, 100]|min) }}%</p>
         </div>
     </div>
 
-    <div class="form-actions">
-        <a href="{{ url_for('doner_dashboard') }}" class="clear-btn">Back</a>
+    <section class="emp-view__desc">
+        <p class="emp-view__desc-label">About this campaign</p>
+        <p class="emp-view__desc-text">{{ fra.description }}</p>
+    </section>
+
+    <footer class="emp-view__actions">
+        {% if is_embed %}
+        <button type="button" class="emp-view-btn emp-view-btn--ghost" data-emp-view-close>Close</button>
+        {% else %}
+        <a href="{{ url_for('doner_dashboard') }}" class="emp-view-btn emp-view-btn--ghost">Back</a>
+        {% endif %}
 
         {% if not is_favourite %}
-        <form action="{{ url_for('add_favourite', fra_id=fra.fra_id) }}" method="POST">
-            <button type="submit" class="action-btn">Add to Favourite</button>
+        <form action="{{ url_for('add_favourite', fra_id=fra.fra_id) }}{% if is_embed %}?embed=1{% endif %}" method="POST" style="display:inline;">
+            <button type="submit" class="emp-view-btn emp-view-btn--ghost">Save</button>
         </form>
         {% endif %}
 
         {% if fra.status in ['active', 'goal_achieved'] %}
-            <a href="{{ url_for('donate_fra', fra_id=fra.fra_id) }}" class="action-btn">Donate</a>
+        <a
+            href="{{ url_for('donate_fra', fra_id=fra.fra_id) }}{% if is_embed %}?embed=1{% endif %}"
+            class="emp-view-btn emp-view-btn--primary emp-view-btn--magnetic"
+        >Donate</a>
         {% else %}
-            <span class="protected-label">Donation Closed</span>
+        <span class="emp-view-btn emp-view-btn--muted">Donations closed</span>
         {% endif %}
-    </div>
-</div>
+    </footer>
+</article>
+{% endblock %}
+
+{% block extra_scripts %}
+{% if is_embed %}
+<script src="{{ url_for('static', filename='empower-view.js') }}"></script>
+{% endif %}
 {% endblock %}

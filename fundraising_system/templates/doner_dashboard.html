@@ -1,82 +1,80 @@
 {% extends "base.html" %}
+{% from "dashboard_macros.html" import emp_head, emp_nav, emp_search, emp_thumb, emp_status_badge, emp_progress, emp_portal_embed %}
 
-{% block title %}Donee Dashboard{% endblock %}
+{% block title %}Donor Dashboard{% endblock %}
+
+{% block extra_head %}{{ emp_head() }}{% endblock %}
+{% block body_class %}empower-dashboard-page{% endblock %}
+{% block main_class %}emp-main{% endblock %}
+
+{% block site_nav %}
+{{ emp_nav() }}
+{% endblock %}
 
 {% block content %}
-<div class="card">
-    <div class="page-header">
+<section class="emp-dash" data-emp-dashboard>
+    <header class="emp-dash__header">
         <div>
-            <h1>Donee Dashboard</h1>
-            <p>Welcome, {{ user_name }}.</p>
-            <p>Search and view fund raising activities.</p>
+            <h1 class="emp-dash__title">Discover campaigns</h1>
+            <p class="emp-dash__subtitle">
+                Welcome, <strong>{{ user_name }}</strong>. Search and support fund raising activities that matter to you.
+            </p>
         </div>
+        <div class="emp-dash__actions">
+            <a href="{{ url_for('doner_favourites') }}" class="emp-btn emp-btn--ghost" data-portal-open="emp-portal-favourites">Favourites</a>
+            <a href="{{ url_for('doner_donation_history') }}" class="emp-btn emp-btn--ghost" data-portal-open="emp-portal-history">History</a>
+        </div>
+    </header>
 
-        <div class="dashboard-actions">
-            <a href="{{ url_for('doner_favourites') }}" class="action-btn">Favourite List</a>
-            <a href="{{ url_for('doner_donation_history') }}" class="action-btn">Donation History</a>
-        </div>
+    {{ emp_search("emp-search", fra_keyword, "Search by title, category, description, or status…") }}
+
+    <div class="emp-list">
+        {% if fra_list %}
+            {% for fra in fra_list %}
+            <article
+                class="emp-card"
+                data-emp-card
+                data-search="{{ fra.fra_id }} {{ fra.title|lower }} {{ fra.category|lower }} {{ (fra.description or '')|lower }} {{ fra.status|lower }}"
+                style="--stagger: {{ loop.index }}"
+            >
+                {{ emp_thumb(fra, loop.index) }}
+                <div class="emp-card__main">
+                    <p class="emp-card__id">Campaign #{{ fra.fra_id }}</p>
+                    <h2 class="emp-card__title">{{ fra.title }}</h2>
+                    <p class="emp-card__meta">{{ fra.category }}</p>
+                </div>
+                <div class="emp-card__aside">
+                    {{ emp_status_badge(fra.status) }}
+                    <a
+                        href="{{ url_for('view_fra', fra_id=fra.fra_id) }}"
+                        class="emp-btn emp-btn--primary emp-btn--sm"
+                        data-portal-open="emp-portal-view"
+                    >View</a>
+                </div>
+                {{ emp_progress(fra) }}
+            </article>
+            {% endfor %}
+        {% endif %}
     </div>
 
-    <form method="GET" action="{{ url_for('doner_dashboard') }}" class="search-form">
-        <input
-            type="text"
-            name="fra_keyword"
-            value="{{ fra_keyword }}"
-            placeholder="Search by title, category, description, or status"
-            class="search-input"
-        >
-        <button type="submit" class="search-btn">Search</button>
-        <a href="{{ url_for('doner_dashboard') }}" class="clear-btn">Clear</a>
-    </form>
-
-    <div class="table-container">
-        <div class="table-scroll-top"><div></div></div>
-        
-        <div class="table-wrap">
-            <table class="account-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Title</th>
-                        <th>Category</th>
-                        <th>Target</th>
-                        <th>Raised</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {% if fra_list %}
-                        {% for fra in fra_list %}
-                        <tr>
-                            <td>{{ fra.fra_id }}</td>
-                            <td>{{ fra.title }}</td>
-                            <td>{{ fra.category }}</td>
-                            <td>${{ "%.2f"|format(fra.target_amount) }}</td>
-                            <td>${{ "%.2f"|format(fra.current_amount) }}</td>
-                            <td>
-                                <span class="status-badge status-{{ fra.status }}">
-                                    {{ fra.status.replace('_', ' ').title() }}
-                                </span>
-                            </td>
-                            <td>
-                                <div class="action-cell">
-                                    <a href="{{ url_for('view_fra', fra_id=fra.fra_id) }}" class="table-btn edit-btn">
-                                        View
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    {% else %}
-                        <tr>
-                            <td colspan="7" class="empty-row">No FRA found.</td>
-                        </tr>
-                    {% endif %}
-                </tbody>
-            </table>
-        </div>
+    {% if not fra_list %}
+    <div class="emp-empty">
+        <svg class="emp-empty__illus" viewBox="0 0 200 160" fill="none" aria-hidden="true">
+            <rect x="24" y="48" width="152" height="88" rx="20" fill="rgba(0,77,64,0.06)" stroke="rgba(0,77,64,0.12)"/>
+            <path d="M48 88h64M48 104h40" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="140" cy="72" r="20" fill="rgba(0,137,123,0.15)" stroke="#00695c"/>
+        </svg>
+        <h2 class="emp-empty__title">No campaigns found</h2>
+        <p class="emp-empty__text">Try a different search or check back soon for new causes.</p>
     </div>
-</div>
+    {% endif %}
+</section>
+
+{{ emp_portal_embed("emp-portal-view") }}
+{{ emp_portal_embed("emp-portal-favourites", true) }}
+{{ emp_portal_embed("emp-portal-history", true) }}
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='empower-dashboard.js') }}"></script>
 {% endblock %}

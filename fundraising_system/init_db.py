@@ -197,6 +197,23 @@ def seed_accounts_and_profiles(cursor):
         "manager": []
     }
 
+    demo_accounts = [
+        ("fundraiser", "Demo Fundraiser", "fundraiser@example.com", "fundraiser", "fundraiser"),
+        ("doner", "Demo Donor", "doner@example.com", "doner", "doner"),
+    ]
+    for username, full_name, email, password, role in demo_accounts:
+        demo_hash = generate_password_hash(password)
+        cursor.execute("""
+            INSERT INTO Account (username, full_name, email, password_hash, status)
+            VALUES (?, ?, ?, ?, ?)
+        """, (username, full_name, email, demo_hash, "active"))
+        demo_id = cursor.lastrowid
+        cursor.execute("""
+            INSERT INTO UserProfile (account_id, role)
+            VALUES (?, ?)
+        """, (demo_id, role))
+        account_ids_by_role[role].append(demo_id)
+
     random_users = fetch_random_users_from_api(99)
 
     for i in range(2, 101):
@@ -411,8 +428,8 @@ def init_database():
     conn.close()
 
     print("Database ready with demo data.")
-    print("Admin login: admin1 / password123")
-    print("Other users also use password123.")
+    print("Demo logins: admin / admin, fundraiser / fundraiser, doner / doner")
+    print("Other seeded users use password123.")
 
 
 if __name__ == "__main__":

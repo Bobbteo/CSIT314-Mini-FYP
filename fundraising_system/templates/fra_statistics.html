@@ -1,63 +1,81 @@
 {% extends "base.html" %}
+{% from "dashboard_macros.html" import emp_status_badge, emp_thumb %}
+
+{% set is_embed = request.args.get('embed') == '1' %}
 
 {% block title %}FRA Statistics{% endblock %}
 
-{% block content %}
-<div class="card">
-    <div class="page-header">
-        <div>
-            <h1>FRA Statistics</h1>
-            <p>View statistics for your current fund raising activities.</p>
-        </div>
+{% block body_class %}{% if is_embed %}emp-stats-embed{% endif %}{% endblock %}
 
-        <div>
-            <a href="{{ url_for('fundraiser_dashboard') }}" class="clear-btn">Back to Dashboard</a>
-        </div>
-    </div>
-    <div class="table-container">
-        <div class="table-scroll-top"><div></div></div>
-        
-        <div class="table-wrap">
-            <table class="account-table">
-                <thead>
-                    <tr>
-                        <th>FRA ID</th>
-                        <th>Title</th>
-                        <th>Category</th>
-                        <th>Target</th>
-                        <th>Raised</th>
-                        <th>Status</th>
-                        <th>Views</th>
-                        <th>Favourites</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {% if stats %}
-                        {% for item in stats %}
-                        <tr>
-                            <td>{{ item.fra.fra_id }}</td>
-                            <td>{{ item.fra.title }}</td>
-                            <td>{{ item.fra.category }}</td>
-                            <td>${{ "%.2f"|format(item.fra.target_amount) }}</td>
-                            <td>${{ "%.2f"|format(item.fra.current_amount) }}</td>
-                            <td>
-                                <span class="status-badge status-{{ item.fra.status }}">
-                                    {{ item.fra.status.replace('_', ' ').title() }}
-                                </span>
-                            </td>
-                            <td>{{ item.view_count }}</td>
-                            <td>{{ item.favourite_count }}</td>
-                        </tr>
-                        {% endfor %}
-                    {% else %}
-                        <tr>
-                            <td colspan="8" class="empty-row">No FRA statistics found.</td>
-                        </tr>
-                    {% endif %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
+{% block site_nav %}
+{% if not is_embed %}
+{{ super() }}
+{% endif %}
 {% endblock %}
+
+{% block extra_head %}
+{% if is_embed %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='empower-dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='empower-stats.css') }}">
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="emp-stats" data-emp-stats>
+    <header class="emp-stats__header">
+        <div>
+            <h1 class="emp-stats__title">Campaign statistics</h1>
+            <p class="emp-stats__subtitle">Performance for your active fund raising activities.</p>
+        </div>
+        {% if not is_embed %}
+        <a href="{{ url_for('fundraiser_dashboard') }}" class="emp-stats__close" style="width:auto;padding:0 14px;font-size:0.875rem;">Back</a>
+        {% endif %}
+    </header>
+
+    {% if stats %}
+    <div class="emp-stats-list">
+        {% for item in stats %}
+        {% set fra = item.fra %}
+        {% set pct = (fra.current_amount / fra.target_amount * 100) if fra.target_amount else 0 %}
+        <article class="emp-stats-row" style="--stagger: {{ loop.index }}">
+            {{ emp_thumb(fra, loop.index) }}
+            <div class="emp-stats-row__main">
+                <p class="emp-stats-row__id">#{{ fra.fra_id }}</p>
+                <h2 class="emp-stats-row__name">{{ fra.title }}</h2>
+                <p class="emp-stats-row__meta">{{ fra.category }}</p>
+            </div>
+            <div class="emp-stats-row__metrics">
+                <div class="emp-stats-metric">
+                    <span class="emp-stats-metric__value">${{ "%.0f"|format(fra.current_amount) }}</span>
+                    <span class="emp-stats-metric__label">raised</span>
+                </div>
+                <div class="emp-stats-metric">
+                    <span class="emp-stats-metric__value">{{ item.view_count }}</span>
+                    <span class="emp-stats-metric__label">views</span>
+                </div>
+                <div class="emp-stats-metric">
+                    <span class="emp-stats-metric__value">{{ item.favourite_count }}</span>
+                    <span class="emp-stats-metric__label">saved</span>
+                </div>
+            </div>
+            <div class="emp-stats-row__aside">
+                {{ emp_status_badge(fra.status) }}
+                <div class="emp-stats-row__bar" aria-hidden="true">
+                    <div class="emp-stats-row__bar-fill" style="--pct: {{ [pct, 100]|min }}%"></div>
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="emp-stats-empty">
+        <p>No active campaigns to show statistics for.</p>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}
+
+{% block extra_scripts %}{% endblock %}
