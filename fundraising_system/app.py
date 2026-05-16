@@ -552,6 +552,9 @@ def view_fra(fra_id):
 def add_favourite(fra_id):
     result = add_favourite_controller.add_favourite(session.get("account_id"), fra_id)
     flash(result["message"], "success" if result["success"] else "danger")
+    embed = request.args.get("embed") == "1" or request.form.get("embed") == "1"
+    if embed:
+        return redirect(url_for("view_fra", fra_id=fra_id, embed=1))
     return redirect(url_for("view_fra", fra_id=fra_id))
 
 
@@ -571,6 +574,7 @@ def remove_favourite(fra_id):
 @restricted_block_required
 def donate_fra(fra_id):
     fra = read_public_fra_controller.get_fra(fra_id)
+    embed = request.args.get("embed") == "1" or request.form.get("embed") == "1"
 
     if not fra:
         flash("FRA not found.", "danger")
@@ -588,7 +592,10 @@ def donate_fra(fra_id):
         flash(result["message"], "success" if result["success"] else "danger")
 
         if result["success"]:
+            if embed:
+                return redirect(url_for("view_fra", fra_id=fra_id, embed=1))
             return redirect(url_for("view_fra", fra_id=fra_id))
+        return render_template("fake_payment.html", fra=fra)
 
     return render_template("fake_payment.html", fra=fra)
 
@@ -607,7 +614,8 @@ def manager_dashboard():
         return render_template(
             "manager_dashboard.html",
             view="categories",
-            categories=categories
+            categories=categories,
+            user_name=session.get("full_name"),
         )
 
     today = date.today().isoformat()
@@ -629,7 +637,8 @@ def manager_dashboard():
         monthly_report=monthly_report,
         daily_date=daily_date,
         weekly_start=weekly_start,
-        monthly_month=monthly_month
+        monthly_month=monthly_month,
+        user_name=session.get("full_name"),
     )
 
 

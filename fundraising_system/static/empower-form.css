@@ -186,6 +186,12 @@ body.emp-form-embed .flash {
     color-scheme: light;
 }
 
+.emp-field--stacked textarea {
+    min-height: 120px;
+    padding: 12px 14px;
+    resize: vertical;
+}
+
 .emp-field:not(.emp-field--stacked):not(.emp-field--date) label {
     position: absolute;
     left: 14px;

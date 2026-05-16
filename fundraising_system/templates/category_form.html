@@ -1,42 +1,76 @@
 {% extends "base.html" %}
+{% from "dashboard_macros.html" import emp_head, emp_nav %}
+
+{% set user_name = session.get('full_name') or session.get('username') %}
 
 {% block title %}
     {% if form_mode == 'create' %}Create Category{% else %}Edit Category{% endif %}
 {% endblock %}
 
+{% block extra_head %}
+{{ emp_head() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='empower-form.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='empower-manager.css') }}">
+{% endblock %}
+{% block body_class %}empower-dashboard-page empower-manager-page{% endblock %}
+{% block main_class %}emp-main{% endblock %}
+
+{% block site_nav %}
+{{ emp_nav() }}
+{% endblock %}
+
 {% block content %}
-<div class="card form-card">
-    <h1>
-        {% if form_mode == 'create' %}
-            Create FRA Category
-        {% else %}
-            Edit FRA Category
-        {% endif %}
-    </h1>
+<div class="emp-form" data-emp-form data-step="1">
+    <header class="emp-form__header">
+        <h1 class="emp-form__title">
+            {% if form_mode == 'create' %}
+                Create FRA category
+            {% else %}
+                Edit FRA category
+            {% endif %}
+        </h1>
+        <p class="emp-form__subtitle">
+            {% if form_mode == 'create' %}
+                Add a category fundraisers can use for new campaigns.
+            {% else %}
+                Update the category name and description.
+            {% endif %}
+        </p>
+    </header>
 
     <form method="POST">
-        <div class="form-group">
-            <label for="category_name">Category Name</label>
-            <input
-                type="text"
-                id="category_name"
-                name="category_name"
-                value="{{ category.category_name if category else '' }}"
-                required
-            >
+        <div class="emp-form__steps">
+            <div class="emp-form__panel is-active" data-emp-step="1">
+                <div class="emp-field emp-field--stacked">
+                    <label for="category_name">Category name</label>
+                    <input
+                        type="text"
+                        id="category_name"
+                        name="category_name"
+                        value="{{ category.category_name if category else '' }}"
+                        required
+                    >
+                </div>
+
+                <div class="emp-field emp-field--stacked emp-field--area">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" rows="4">{{ category.description if category else '' }}</textarea>
+                </div>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label for="description">Description</label>
-            <textarea id="description" name="description" rows="5">{{ category.description if category else '' }}</textarea>
-        </div>
-
-        <div class="form-actions">
-            <a href="{{ url_for('manager_dashboard') }}" class="clear-btn">Back</a>
-            <button type="submit" class="action-btn">
-                {% if form_mode == 'create' %}Create{% else %}Update{% endif %}
-            </button>
+        <div class="emp-form__actions">
+            <a href="{{ url_for('manager_dashboard', view='categories') }}" class="emp-form-btn emp-form-btn--ghost">Back</a>
+            <div class="emp-form__actions-end">
+                <button type="submit" class="emp-form-btn emp-form-btn--primary emp-form-btn--magnetic">
+                    {% if form_mode == 'create' %}Create category{% else %}Save changes{% endif %}
+                </button>
+            </div>
         </div>
     </form>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='empower-dashboard.js') }}"></script>
 {% endblock %}

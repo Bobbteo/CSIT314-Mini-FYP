@@ -3,27 +3,32 @@
 
 {% set is_embed = request.args.get('embed') == '1' %}
 {% set pct = (fra.current_amount / fra.target_amount * 100) if fra.target_amount else 0 %}
+{% set bar_pct = [pct, 100]|min %}
+{% if fra.current_amount > 0 and bar_pct > 0 and bar_pct < 4 %}
+    {% set bar_pct = 4 %}
+{% endif %}
 {% set heroes = ['fund1.jpg', 'fund2.jpg', 'fund3.jpg', 'fund4.jpg', 'fund5.jpg'] %}
 {% set hero_img = heroes[fra.fra_id % heroes|length] %}
 
 {% block title %}{{ fra.title }}{% endblock %}
 
-{% block body_class %}{% if is_embed %}emp-view-embed{% endif %}{% endblock %}
+{% block body_class %}{% if is_embed %}emp-view-embed{% else %}empower-dashboard-page{% endif %}{% endblock %}
+{% block main_class %}{% if not is_embed %}emp-main{% endif %}{% endblock %}
 
 {% block site_nav %}
 {% if not is_embed %}
-{{ super() }}
+{% from "dashboard_macros.html" import emp_nav %}
+{% set user_name = session.get('full_name') or session.get('username') %}
+{{ emp_nav() }}
 {% endif %}
 {% endblock %}
 
 {% block extra_head %}
-{% if is_embed %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ url_for('static', filename='empower-dashboard.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='empower-view.css') }}">
-{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -50,11 +55,11 @@
             </p>
             <p class="emp-view__target">of ${{ "%.2f"|format(fra.target_amount) }}</p>
         </div>
-        <div class="emp-view__bar">
+        <div class="emp-view__bar" role="progressbar" aria-valuenow="{{ "%.2f"|format([pct, 100]|min) }}" aria-valuemin="0" aria-valuemax="100" title="{{ "%.2f"|format(pct) }}% raised">
             <div
                 class="emp-view__bar-fill"
-                style="--pct: {{ [pct, 100]|min }}%; width: 0;"
-                data-pct="{{ [pct, 100]|min }}%"
+                style="--pct: {{ bar_pct }}%; width: 0;"
+                data-pct="{{ bar_pct }}%"
             ></div>
         </div>
     </section>
@@ -70,7 +75,7 @@
         </div>
         <div class="emp-view__stat">
             <p class="emp-view__stat-label">Progress</p>
-            <p class="emp-view__stat-value">{{ "%.0f"|format([pct, 100]|min) }}%</p>
+            <p class="emp-view__stat-value">{% if pct > 0 and pct < 1 %}{{ "%.2f"|format(pct) }}{% else %}{{ "%.0f"|format([pct, 100]|min) }}{% endif %}%</p>
         </div>
     </div>
 
@@ -88,6 +93,7 @@
 
         {% if not is_favourite %}
         <form action="{{ url_for('add_favourite', fra_id=fra.fra_id) }}{% if is_embed %}?embed=1{% endif %}" method="POST" style="display:inline;">
+            {% if is_embed %}<input type="hidden" name="embed" value="1">{% endif %}
             <button type="submit" class="emp-view-btn emp-view-btn--ghost">Save</button>
         </form>
         {% endif %}
@@ -105,7 +111,5 @@
 {% endblock %}
 
 {% block extra_scripts %}
-{% if is_embed %}
 <script src="{{ url_for('static', filename='empower-view.js') }}"></script>
-{% endif %}
 {% endblock %}

@@ -200,6 +200,7 @@ def seed_accounts_and_profiles(cursor):
     demo_accounts = [
         ("fundraiser", "Demo Fundraiser", "fundraiser@example.com", "fundraiser", "fundraiser"),
         ("doner", "Demo Donor", "doner@example.com", "doner", "doner"),
+        ("manager", "Demo Manager", "manager@example.com", "manager", "manager"),
     ]
     for username, full_name, email, password, role in demo_accounts:
         demo_hash = generate_password_hash(password)
@@ -428,7 +429,7 @@ def init_database():
     conn.close()
 
     print("Database ready with demo data.")
-    print("Demo logins: admin / admin, fundraiser / fundraiser, doner / doner")
+    print("Demo logins: admin / admin, fundraiser / fundraiser, doner / doner, manager / manager")
     print("Other seeded users use password123.")
 
 

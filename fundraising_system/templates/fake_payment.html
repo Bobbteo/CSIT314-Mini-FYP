@@ -1,51 +1,107 @@
 {% extends "base.html" %}
 
-{% block title %}Fake Payment{% endblock %}
+{% set is_embed = request.args.get('embed') == '1' %}
+{% set pct = (fra.current_amount / fra.target_amount * 100) if fra.target_amount else 0 %}
+{% set bar_pct = [pct, 100]|min %}
+{% if fra.current_amount > 0 and bar_pct > 0 and bar_pct < 4 %}
+    {% set bar_pct = 4 %}
+{% endif %}
+{% set heroes = ['fund1.jpg', 'fund2.jpg', 'fund3.jpg', 'fund4.jpg', 'fund5.jpg'] %}
+{% set hero_img = heroes[fra.fra_id % heroes|length] %}
+
+{% block title %}Donate{% endblock %}
+
+{% block body_class %}{% if is_embed %}emp-pay-embed{% else %}empower-dashboard-page{% endif %}{% endblock %}
+{% block main_class %}{% if not is_embed %}emp-main{% endif %}{% endblock %}
+
+{% block site_nav %}
+{% if not is_embed %}
+{% from "dashboard_macros.html" import emp_nav %}
+{% set user_name = session.get('full_name') or session.get('username') %}
+{{ emp_nav() }}
+{% endif %}
+{% endblock %}
+
+{% block extra_head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='empower-dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='empower-view.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='empower-payment.css') }}">
+{% endblock %}
 
 {% block content %}
-<div class="card form-card">
-    <h1>Fake Payment Site</h1>
-    <p class="subtitle">You are donating to <strong>{{ fra.title }}</strong>.</p>
-
-    <div class="detail-list">
-        <div class="detail-item">
-            <div class="detail-label">Current Raised</div>
-            <div class="detail-value">${{ "%.2f"|format(fra.current_amount) }}</div>
+<article class="emp-pay" data-emp-pay>
+    <header class="emp-pay__hero">
+        <div class="emp-pay__thumb">
+            <img src="{{ url_for('static', filename='images/hero/' ~ hero_img) }}" alt="">
         </div>
-        <div class="detail-item">
-            <div class="detail-label">Target Amount</div>
-            <div class="detail-value">${{ "%.2f"|format(fra.target_amount) }}</div>
+        <div>
+            <p class="emp-pay__eyebrow">Secure checkout · demo</p>
+            <h1 class="emp-pay__title">Complete your donation</h1>
+            <p class="emp-pay__campaign">{{ fra.title }}</p>
         </div>
-    </div>
+    </header>
 
-    <form method="POST">
-        <div class="form-group">
-            <label for="amount">Donation Amount</label>
+    <section class="emp-view__progress" aria-label="Campaign progress">
+        <div class="emp-view__amounts">
+            <p class="emp-view__raised">
+                ${{ "%.2f"|format(fra.current_amount) }}
+                <span>raised</span>
+            </p>
+            <p class="emp-view__target">of ${{ "%.2f"|format(fra.target_amount) }}</p>
+        </div>
+        <div class="emp-view__bar">
+            <div class="emp-view__bar-fill" style="--pct: {{ bar_pct }}%; width: {{ bar_pct }}%;"></div>
+        </div>
+    </section>
+
+    <form
+        method="POST"
+        action="{{ url_for('donate_fra', fra_id=fra.fra_id) }}{% if is_embed %}?embed=1{% endif %}"
+        class="emp-pay__form"
+    >
+        {% if is_embed %}<input type="hidden" name="embed" value="1">{% endif %}
+
+        <div class="emp-pay__field">
+            <label for="amount">Donation amount ($)</label>
             <input
                 type="number"
                 id="amount"
                 name="amount"
                 min="1"
                 step="0.01"
-                placeholder="Enter amount"
+                placeholder="0.00"
                 required
+                autocomplete="off"
             >
         </div>
 
-        <div class="form-group">
-            <label>Card Number</label>
-            <input type="text" value="4111 1111 1111 1111" readonly>
+        <div class="emp-pay__card">
+            <p class="emp-pay__card-label">Payment method</p>
+            <div class="emp-pay__card-row">
+                <span class="emp-pay__card-icon" aria-hidden="true">💳</span>
+                <div>
+                    <p class="emp-pay__card-number">4111 1111 1111 1111</p>
+                    <p class="emp-pay__card-note">Test card · fake payment always succeeds</p>
+                </div>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label>Payment Status</label>
-            <input type="text" value="Fake payment always succeeds" readonly>
-        </div>
-
-        <div class="form-actions">
-            <a href="{{ url_for('view_fra', fra_id=fra.fra_id) }}" class="clear-btn">Cancel</a>
-            <button type="submit" class="action-btn">Confirm Donation</button>
-        </div>
+        <footer class="emp-view__actions">
+            <a
+                href="{{ url_for('view_fra', fra_id=fra.fra_id) }}{% if is_embed %}?embed=1{% endif %}"
+                class="emp-view-btn emp-view-btn--ghost"
+            >{% if is_embed %}Back{% else %}Cancel{% endif %}</a>
+            <button type="submit" class="emp-view-btn emp-view-btn--primary emp-view-btn--magnetic">
+                Confirm donation
+            </button>
+        </footer>
     </form>
-</div>
+</article>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='empower-payment.js') }}"></script>
 {% endblock %}

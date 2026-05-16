@@ -64,13 +64,28 @@
 
 {% macro emp_progress(fra) %}
 {% set pct = (fra.current_amount / fra.target_amount * 100) if fra.target_amount else 0 %}
+{% set bar_pct = [pct, 100]|min %}
+{% if fra.current_amount > 0 and bar_pct > 0 and bar_pct < 4 %}
+    {% set bar_pct = 4 %}
+{% endif %}
 <div class="emp-card__progress">
     <div class="emp-card__amounts">
         <span class="emp-card__raised">${{ "%.2f"|format(fra.current_amount) }}</span>
         <span class="emp-card__of">of ${{ "%.2f"|format(fra.target_amount) }}</span>
+        {% if fra.current_amount > 0 and pct < 4 %}
+        <span class="emp-card__pct" title="Actual progress toward goal">{{ "%.2f"|format(pct) }}%</span>
+        {% endif %}
     </div>
-    <div class="emp-card__bar" data-progress-bar>
-        <div class="emp-card__bar-fill" data-progress-fill style="--target-pct: {{ [pct, 100]|min }}%"></div>
+    <div
+        class="emp-card__bar"
+        data-progress-bar
+        role="progressbar"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow="{{ "%.2f"|format([pct, 100]|min) }}"
+        title="{{ "%.2f"|format(pct) }}% raised"
+    >
+        <div class="emp-card__bar-fill" data-progress-fill style="--target-pct: {{ bar_pct }}%"></div>
     </div>
 </div>
 {% endmacro %}
